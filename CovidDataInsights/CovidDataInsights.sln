@@ -3,9 +3,35 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33801.468
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{2F6C9DBD-BF54-46F3-8ACB-F7034541702B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Building Blocks", "Building Blocks", "{04D7A13F-C291-487F-B456-931A28C53A89}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{E292BC54-436A-447F-AA63-25821644EF44}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Web", "Web", "{98EF5D09-B8CD-4805-9054-CC50647EBEE9}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CDI.CovidDataManagement.API", "src\services\CDI.CovidDataManagement.API\CDI.CovidDataManagement.API.csproj", "{E061AAC8-29EF-4ACE-B2DD-502921F068B2}"
+EndProject
 Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E061AAC8-29EF-4ACE-B2DD-502921F068B2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E061AAC8-29EF-4ACE-B2DD-502921F068B2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E061AAC8-29EF-4ACE-B2DD-502921F068B2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E061AAC8-29EF-4ACE-B2DD-502921F068B2}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{04D7A13F-C291-487F-B456-931A28C53A89} = {2F6C9DBD-BF54-46F3-8ACB-F7034541702B}
+		{E292BC54-436A-447F-AA63-25821644EF44} = {2F6C9DBD-BF54-46F3-8ACB-F7034541702B}
+		{98EF5D09-B8CD-4805-9054-CC50647EBEE9} = {2F6C9DBD-BF54-46F3-8ACB-F7034541702B}
+		{E061AAC8-29EF-4ACE-B2DD-502921F068B2} = {E292BC54-436A-447F-AA63-25821644EF44}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {C68B7C77-71F6-4C2D-94FD-804CAE51784D}
