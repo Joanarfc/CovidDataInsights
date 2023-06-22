@@ -1,6 +1,8 @@
-﻿namespace CDI.CovidDataManagement.API.Models
+﻿using CDI.Core.DomainObjects;
+
+namespace CDI.CovidDataManagement.API.Models
 {
-    public class IntegrationModel
+    public class IntegrationModel : Entity
     {
         public DateTime IntegrationTimestamp { get; set; }
         public string? FileName { get; set; }
