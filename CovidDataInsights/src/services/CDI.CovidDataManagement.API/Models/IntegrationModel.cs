@@ -8,5 +8,8 @@ namespace CDI.CovidDataManagement.API.Models
         public string? FileName { get; set; }
         public int NumberOfRows { get; set; }
         public int RowsIntegrated { get; set; }
+
+        // EF navigation property of the 1:N relationship
+        public ICollection<VaccinationDataModel>? VaccinationData { get; set; }
     }
 }
