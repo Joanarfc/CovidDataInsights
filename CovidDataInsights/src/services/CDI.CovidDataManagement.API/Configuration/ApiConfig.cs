@@ -1,4 +1,5 @@
 ﻿using CDI.CovidDataManagement.API.Data;
+using CDI.CovidDataManagement.API.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace CDI.CovidDataManagement.API.Configuration
@@ -11,6 +12,8 @@ namespace CDI.CovidDataManagement.API.Configuration
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
             services.AddControllers();
+
+            services.Configure<CsvFileSettings>(configuration.GetSection("CsvFiles"));
         }
         public static void UseApiConfiguration(this IApplicationBuilder app)
         {
