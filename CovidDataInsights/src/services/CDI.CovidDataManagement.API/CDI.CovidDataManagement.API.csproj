@@ -21,5 +21,9 @@
 	<ItemGroup>
 	  <ProjectReference Include="..\..\building blocks\CDI.Core\CDI.Core.csproj" />
 	</ItemGroup>
+	
+	<ItemGroup>
+	  <Folder Include="Controllers\" />
+	</ItemGroup>
 
 </Project>
