@@ -1,5 +1,6 @@
 ﻿using CDI.CovidDataManagement.API.Data;
 using CDI.CovidDataManagement.API.Data.Repository;
+using CDI.CovidDataManagement.API.Services;
 
 namespace CDI.CovidDataManagement.API.Configuration
 {
@@ -13,6 +14,9 @@ namespace CDI.CovidDataManagement.API.Configuration
 
             // Register context
             services.AddScoped<ApplicationDbContext>();
+
+            // Register Services
+            services.AddScoped<IFileIntegrationService, FileIntegrationService>();
         }
     }
 }
