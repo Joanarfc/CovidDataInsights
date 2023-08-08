@@ -15,6 +15,7 @@ namespace CDI.CovidDataManagement.API.Data
         }
         public DbSet<IntegrationModel>? IntegrationData { get; set; }
         public DbSet<VaccinationDataModel>? VaccinationData { get; set; }
+        public DbSet<VaccinationMetaDataModel>? VaccinationMetaData { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -92,6 +93,63 @@ namespace CDI.CovidDataManagement.API.Data
 
                 // Configure the FirstVaccineDate property
                 entity.Property(e => e.FirstVaccineDate)
+                .HasMaxLength(10);
+            });
+
+            // Configure the VaccinationMetaData entity
+            modelBuilder.Entity<VaccinationMetaDataModel>(entity =>
+            {
+                // Set the PK
+                entity.HasKey(e => e.Id);
+
+                // Set the 1:N relationship
+                entity.HasOne(v => v.IntegrationData)
+                .WithMany(i => i.VaccinationMetaData)
+                .HasForeignKey(v => v.IntegrationId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+                // Configure the ISO3 property
+                entity.Property(e => e.ISO3)
+                .HasMaxLength(3)
+                .IsRequired();
+
+                // Configure the VaccineName property
+                entity.Property(e => e.VaccineName)
+                .HasMaxLength(64)
+                .IsRequired();
+
+                // Configure the ProductName property
+                entity.Property(e => e.ProductName)
+                .HasMaxLength(64);
+
+                // Configure the CompanyName property
+                entity.Property(e => e.CompanyName)
+                .HasMaxLength(50);
+
+                // Configure the AuthorizationDate property
+                entity.Property(e => e.AuthorizationDate)
+                .HasMaxLength(10);
+
+                // Configure the StartDate property
+                entity.Property(e => e.StartDate)
+                .HasMaxLength(10);
+
+                // Configure the EndDate property
+                entity.Property(e => e.EndDate)
+                .HasMaxLength(10);
+
+                // Configure the DataSource property
+                entity.Property(e => e.DataSource)
+                .HasMaxLength(9)
+                .IsRequired();
+
+                // Configure the DataSource property
+                entity.Property(e => e.DataSource)
+                .HasMaxLength(9)
+                .IsRequired();
+
+                // Configure the VaccinesUsed property
+                entity.Property(e => e.Comment)
                 .HasMaxLength(10);
             });
 
