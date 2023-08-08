@@ -16,6 +16,7 @@ namespace CDI.CovidDataManagement.API.Data
         public DbSet<IntegrationModel>? IntegrationData { get; set; }
         public DbSet<VaccinationDataModel>? VaccinationData { get; set; }
         public DbSet<VaccinationMetaDataModel>? VaccinationMetaData { get; set; }
+        public DbSet<WhoGlobalDataModel>? WhoGlobalData { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -151,6 +152,38 @@ namespace CDI.CovidDataManagement.API.Data
                 // Configure the VaccinesUsed property
                 entity.Property(e => e.Comment)
                 .HasMaxLength(10);
+            });
+
+            // Configure the VaccinationMetaData entity
+            modelBuilder.Entity<WhoGlobalDataModel>(entity =>
+            {
+                // Set the PK
+                entity.HasKey(e => e.Id);
+
+                // Set the 1:N relationship
+                entity.HasOne(v => v.IntegrationData)
+                .WithMany(i => i.WhoGlobalData)
+                .HasForeignKey(v => v.IntegrationId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+                // Configure the DateReported property
+                entity.Property(e => e.DateReported)
+                .HasMaxLength(10)
+                .IsRequired();
+
+                // Configure the CountryCode property
+                entity.Property(e => e.CountryCode)
+                .HasMaxLength(3);
+
+                // Configure the Country property
+                entity.Property(e => e.Country)
+                .HasMaxLength(65)
+                .IsRequired();
+
+                // Configure the WhoRegion property
+                entity.Property(e => e.WhoRegion)
+                .HasMaxLength(10)
+                .IsRequired();
             });
 
             // Apply configurations from the current assembly

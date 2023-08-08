@@ -12,5 +12,6 @@ namespace CDI.CovidDataManagement.API.Models
         // EF navigation property of the 1:N relationship
         public ICollection<VaccinationDataModel>? VaccinationData { get; set; }
         public ICollection<VaccinationMetaDataModel>? VaccinationMetaData { get; set; }
+        public ICollection<WhoGlobalDataModel>? WhoGlobalData { get; set; }
     }
 }
