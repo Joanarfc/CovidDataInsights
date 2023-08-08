@@ -4,5 +4,6 @@
     {
         public string? CsvPath { get; set; }
         public string? VaccinationDataFile { get; set; }
+        public string? VaccinationMetadataFile { get; set; }
     }
 }

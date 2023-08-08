@@ -18,15 +18,18 @@ namespace CDI.CovidDataManagement.API.Services
         // Dependencies
         private readonly IFileIntegrationRepository _integrationRepository;
         private readonly IVaccinationDataRepository _vaccinationDataRepository;
+        private readonly IVaccinationMetaDataRepository _vaccinationMetaDataRepository;
         private readonly CsvFileSettings _csvFileSettings;
 
         public FileIntegrationService(IFileIntegrationRepository integrationRepository,
                                      IOptions<CsvFileSettings> csvFileSettings,
-                                     IVaccinationDataRepository vaccinationDataRepository)
+                                     IVaccinationDataRepository vaccinationDataRepository,
+                                     IVaccinationMetaDataRepository vaccinationMetaDataRepository)
         {
             _csvFileSettings = csvFileSettings.Value;
             _integrationRepository = integrationRepository;
             _vaccinationDataRepository = vaccinationDataRepository;
+            _vaccinationMetaDataRepository = vaccinationMetaDataRepository;
         }
 
         public async Task IntegrateCsvDataAsync()
@@ -35,9 +38,11 @@ namespace CDI.CovidDataManagement.API.Services
             var csvFolderPath = _csvFileSettings.CsvPath;
 
             var vaccinationDataFilename = _csvFileSettings?.VaccinationDataFile;
+            var vaccinationMetaDataFilename = _csvFileSettings?.VaccinationMetadataFile;
 
             // Combine the folder path and filenames to get the full file paths
             var vaccinationDataFile = Path.Combine(csvFolderPath ?? string.Empty, vaccinationDataFilename ?? string.Empty);
+            var vaccinationMetaDataFile = Path.Combine(csvFolderPath ?? string.Empty, vaccinationMetaDataFilename ?? string.Empty);
 
             // Process the VaccinationData CSV file if it exists
             if (File.Exists(vaccinationDataFile))
@@ -60,6 +65,30 @@ namespace CDI.CovidDataManagement.API.Services
 
                     // Add VaccinationData in database
                     await _vaccinationDataRepository.AddVaccinationDataRangeAsync(vaccinationData);
+                }
+            }
+
+            // Process the VaccinationMetadata CSV file if it exists
+            if (File.Exists(vaccinationMetaDataFile))
+            {
+                // Read the CSV file and get the number of records
+                var (vaccinationMetaData, numberOfRows) = ReadCsvFile<VaccinationMetaDataModel, VaccinationMetaDataModelToCsvMap>(vaccinationMetaDataFile);
+                var rowsIntegrated = vaccinationMetaData.Count();
+
+                if (vaccinationMetaDataFilename != null)
+                {
+                    // Create an integration model and add it to the repository
+                    var integrationModel = CreateIntegrationModel(vaccinationMetaDataFilename, numberOfRows, rowsIntegrated);
+                    await _integrationRepository.AddAsync(integrationModel);
+
+                    // Set the IntegrationId (FK) for each record and add them to the VaccinationMetaData repository
+                    foreach (var data in vaccinationMetaData)
+                    {
+                        data.IntegrationId = integrationModel.Id;
+                    }
+
+                    // Add VaccinationMetaData in database
+                    await _vaccinationMetaDataRepository.AddVaccinationMetaDataRangeAsync(vaccinationMetaData);
                 }
             }
         }
