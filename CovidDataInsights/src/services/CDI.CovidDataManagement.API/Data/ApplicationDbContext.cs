@@ -85,6 +85,14 @@ namespace CDI.CovidDataManagement.API.Data
                 // Configure the VaccinesUsed property
                 entity.Property(e => e.VaccinesUsed)
                 .HasMaxLength(3);
+
+                // Configure the DateUpdated property
+                entity.Property(e => e.DateUpdated)
+                .HasMaxLength(10);
+
+                // Configure the FirstVaccineDate property
+                entity.Property(e => e.FirstVaccineDate)
+                .HasMaxLength(10);
             });
 
             // Apply configurations from the current assembly
