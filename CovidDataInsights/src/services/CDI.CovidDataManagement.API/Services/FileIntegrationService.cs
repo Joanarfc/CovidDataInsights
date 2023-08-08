@@ -1,4 +1,4 @@
-﻿using CDI.CovidDataManagement.API.Data.Mappings;
+﻿  using CDI.CovidDataManagement.API.Data.Mappings;
 using CDI.CovidDataManagement.API.Data.Repository;
 using CDI.CovidDataManagement.API.Extensions;
 using CDI.CovidDataManagement.API.Models;
@@ -19,17 +19,20 @@ namespace CDI.CovidDataManagement.API.Services
         private readonly IFileIntegrationRepository _integrationRepository;
         private readonly IVaccinationDataRepository _vaccinationDataRepository;
         private readonly IVaccinationMetaDataRepository _vaccinationMetaDataRepository;
+        private readonly IWhoGlobalDataRepository _whoGlobalDataRepository;
         private readonly CsvFileSettings _csvFileSettings;
 
         public FileIntegrationService(IFileIntegrationRepository integrationRepository,
                                      IOptions<CsvFileSettings> csvFileSettings,
                                      IVaccinationDataRepository vaccinationDataRepository,
-                                     IVaccinationMetaDataRepository vaccinationMetaDataRepository)
+                                     IVaccinationMetaDataRepository vaccinationMetaDataRepository,
+                                     IWhoGlobalDataRepository whoGlobalDataRepository)
         {
             _csvFileSettings = csvFileSettings.Value;
             _integrationRepository = integrationRepository;
             _vaccinationDataRepository = vaccinationDataRepository;
             _vaccinationMetaDataRepository = vaccinationMetaDataRepository;
+            _whoGlobalDataRepository = whoGlobalDataRepository;
         }
 
         public async Task IntegrateCsvDataAsync()
@@ -39,10 +42,12 @@ namespace CDI.CovidDataManagement.API.Services
 
             var vaccinationDataFilename = _csvFileSettings?.VaccinationDataFile;
             var vaccinationMetaDataFilename = _csvFileSettings?.VaccinationMetadataFile;
+            var whoGlobalDataFilename = _csvFileSettings?.GlobalDataFile;
 
             // Combine the folder path and filenames to get the full file paths
             var vaccinationDataFile = Path.Combine(csvFolderPath ?? string.Empty, vaccinationDataFilename ?? string.Empty);
             var vaccinationMetaDataFile = Path.Combine(csvFolderPath ?? string.Empty, vaccinationMetaDataFilename ?? string.Empty);
+            var whoGlobalDataFile = Path.Combine(csvFolderPath ?? string.Empty, whoGlobalDataFilename ?? string.Empty);
 
             // Process the VaccinationData CSV file if it exists
             if (File.Exists(vaccinationDataFile))
@@ -89,6 +94,30 @@ namespace CDI.CovidDataManagement.API.Services
 
                     // Add VaccinationMetaData in database
                     await _vaccinationMetaDataRepository.AddVaccinationMetaDataRangeAsync(vaccinationMetaData);
+                }
+            }
+
+            // Process the WhoGlobalData CSV file if it exists
+            if (File.Exists(whoGlobalDataFile))
+            {
+                // Read the CSV file and get the number of records
+                var (whoGlobalData, numberOfRows) = ReadCsvFile<WhoGlobalDataModel, WhoGlobalDataModelToCsvMap>(whoGlobalDataFile);
+                var rowsIntegrated = whoGlobalData.Count();
+
+                if (whoGlobalDataFilename != null)
+                {
+                    // Create an integration model and add it to the repository
+                    var integrationModel = CreateIntegrationModel(whoGlobalDataFilename, numberOfRows, rowsIntegrated);
+                    await _integrationRepository.AddAsync(integrationModel);
+
+                    // Set the IntegrationId (FK) for each record and add them to the VaccinationMetaData repository
+                    foreach (var data in whoGlobalData)
+                    {
+                        data.IntegrationId = integrationModel.Id;
+                    }
+
+                    // Add VaccinationMetaData in database
+                    await _whoGlobalDataRepository.AddWhoGlobalDataRangeAsync(whoGlobalData);
                 }
             }
         }
