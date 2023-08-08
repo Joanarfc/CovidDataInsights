@@ -11,6 +11,7 @@ namespace CDI.CovidDataManagement.API.Configuration
             // Register repositories
             services.AddScoped<IFileIntegrationRepository, FileIntegrationRepository>();
             services.AddScoped<IVaccinationDataRepository, VaccinationDataRepository>();
+            services.AddScoped<IVaccinationMetaDataRepository, VaccinationMetaDataRepository>();
 
             // Register context
             services.AddScoped<ApplicationDbContext>();
