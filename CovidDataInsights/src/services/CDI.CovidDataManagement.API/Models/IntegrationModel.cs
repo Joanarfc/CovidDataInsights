@@ -13,5 +13,6 @@ namespace CDI.CovidDataManagement.API.Models
         public ICollection<VaccinationDataModel>? VaccinationData { get; set; }
         public ICollection<VaccinationMetaDataModel>? VaccinationMetaData { get; set; }
         public ICollection<WhoGlobalDataModel>? WhoGlobalData { get; set; }
+        public ICollection<WhoGlobalTableDataModel>? WhoGlobalTableData { get; set; }
     }
 }
