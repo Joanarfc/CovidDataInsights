@@ -5,7 +5,7 @@
         public string? CsvPath { get; set; }
         public string? VaccinationDataFile { get; set; }
         public string? VaccinationMetadataFile { get; set; }
-
         public string? GlobalDataFile { get; set; }
+        public string? GlobalTableDataFile { get; set; }
     }
 }
