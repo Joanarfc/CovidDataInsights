@@ -20,19 +20,22 @@ namespace CDI.CovidDataManagement.API.Services
         private readonly IVaccinationDataRepository _vaccinationDataRepository;
         private readonly IVaccinationMetaDataRepository _vaccinationMetaDataRepository;
         private readonly IWhoGlobalDataRepository _whoGlobalDataRepository;
+        private readonly IWhoGlobalTableDataRepository _whoGlobalTableDataRepository;
         private readonly CsvFileSettings _csvFileSettings;
 
         public FileIntegrationService(IFileIntegrationRepository integrationRepository,
                                      IOptions<CsvFileSettings> csvFileSettings,
                                      IVaccinationDataRepository vaccinationDataRepository,
                                      IVaccinationMetaDataRepository vaccinationMetaDataRepository,
-                                     IWhoGlobalDataRepository whoGlobalDataRepository)
+                                     IWhoGlobalDataRepository whoGlobalDataRepository,
+                                     IWhoGlobalTableDataRepository whoGlobalTableDataRepository)
         {
             _csvFileSettings = csvFileSettings.Value;
             _integrationRepository = integrationRepository;
             _vaccinationDataRepository = vaccinationDataRepository;
             _vaccinationMetaDataRepository = vaccinationMetaDataRepository;
             _whoGlobalDataRepository = whoGlobalDataRepository;
+            _whoGlobalTableDataRepository = whoGlobalTableDataRepository;
         }
 
         public async Task IntegrateCsvDataAsync()
@@ -43,11 +46,13 @@ namespace CDI.CovidDataManagement.API.Services
             var vaccinationDataFilename = _csvFileSettings?.VaccinationDataFile;
             var vaccinationMetaDataFilename = _csvFileSettings?.VaccinationMetadataFile;
             var whoGlobalDataFilename = _csvFileSettings?.GlobalDataFile;
+            var whoGlobalTableDataFilename = _csvFileSettings?.GlobalTableDataFile;
 
             // Combine the folder path and filenames to get the full file paths
             var vaccinationDataFile = Path.Combine(csvFolderPath ?? string.Empty, vaccinationDataFilename ?? string.Empty);
             var vaccinationMetaDataFile = Path.Combine(csvFolderPath ?? string.Empty, vaccinationMetaDataFilename ?? string.Empty);
             var whoGlobalDataFile = Path.Combine(csvFolderPath ?? string.Empty, whoGlobalDataFilename ?? string.Empty);
+            var whoGlobalTableDataFile = Path.Combine(csvFolderPath ?? string.Empty, whoGlobalTableDataFilename ?? string.Empty);
 
             // Process the VaccinationData CSV file if it exists
             if (File.Exists(vaccinationDataFile))
@@ -118,6 +123,30 @@ namespace CDI.CovidDataManagement.API.Services
 
                     // Add VaccinationMetaData in database
                     await _whoGlobalDataRepository.AddWhoGlobalDataRangeAsync(whoGlobalData);
+                }
+            }
+
+            // Process the WhoGlobalTableData CSV file if it exists
+            if (File.Exists(whoGlobalTableDataFile))
+            {
+                // Read the CSV file and get the number of records
+                var (whoGlobalTableData, numberOfRows) = ReadCsvFile<WhoGlobalTableDataModel, WhoGlobalTableDataModelToCsvMap>(whoGlobalTableDataFile);
+                var rowsIntegrated = whoGlobalTableData.Count();
+
+                if (whoGlobalTableDataFilename != null)
+                {
+                    // Create an integration model and add it to the repository
+                    var integrationModel = CreateIntegrationModel(whoGlobalTableDataFilename, numberOfRows, rowsIntegrated);
+                    await _integrationRepository.AddAsync(integrationModel);
+
+                    // Set the IntegrationId (FK) for each record and add them to the VaccinationMetaData repository
+                    foreach (var data in whoGlobalTableData)
+                    {
+                        data.IntegrationId = integrationModel.Id;
+                    }
+
+                    // Add VaccinationMetaData in database
+                    await _whoGlobalTableDataRepository.AddWhoGlobalTableDataRangeAsync(whoGlobalTableData);
                 }
             }
         }
