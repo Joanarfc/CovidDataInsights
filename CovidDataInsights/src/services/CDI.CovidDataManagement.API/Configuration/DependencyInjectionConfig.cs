@@ -10,6 +10,8 @@ namespace CDI.CovidDataManagement.API.Configuration
     {
         public static void RegisterServices(this IServiceCollection services)
         {
+            services.AddHttpClient();
+
             // Register repositories
             services.AddScoped<IFileIntegrationRepository, FileIntegrationRepository>();
             services.AddScoped<IVaccinationDataRepository, VaccinationDataRepository>();

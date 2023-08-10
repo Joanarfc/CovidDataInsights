@@ -57,105 +57,90 @@ namespace CDI.CovidDataManagement.API.Services
 
         private async Task IntegrateVaccinationDataAsync()
         {
-            var csvFolderPath = _csvFileSettings.CsvPath;
-            var vaccinationDataFilename = _csvFileSettings?.VaccinationDataFile;
-            var vaccinationDataFile = Path.Combine(csvFolderPath ?? string.Empty, vaccinationDataFilename ?? string.Empty);
+            var csvUrl = _csvFileSettings?.VaccinationDataFile;
 
-            if (File.Exists(vaccinationDataFile))
+            if (!string.IsNullOrEmpty(csvUrl))
             {
-                var (vaccinationData, numberOfRows) = _vaccinationDataReaderService.ReadCsvFile(vaccinationDataFile);
+                var csvFilename = Path.GetFileName(csvUrl);
+                var (vaccinationData, numberOfRows) = await _vaccinationDataReaderService.ReadCsvFile(csvUrl);
                 var rowsIntegrated = vaccinationData.Count();
 
-                if (vaccinationDataFilename != null)
+                var integrationModel = IntegrationRecordFactory.CreateIntegrationRecord(csvFilename, numberOfRows, rowsIntegrated);
+                await _integrationRepository.AddAsync(integrationModel);
+
+                foreach (var data in vaccinationData)
                 {
-                    var integrationModel = IntegrationRecordFactory.CreateIntegrationRecord(vaccinationDataFilename, numberOfRows, rowsIntegrated);
-                    await _integrationRepository.AddAsync(integrationModel);
-
-                    foreach (var data in vaccinationData)
-                    {
-                        data.IntegrationId = integrationModel.Id;
-                    }
-
-                    await _vaccinationDataRepository.AddVaccinationDataRangeAsync(vaccinationData);
+                    data.IntegrationId = integrationModel.Id;
                 }
+
+                await _vaccinationDataRepository.AddVaccinationDataRangeAsync(vaccinationData);
             }
         }
 
         private async Task IntegrateVaccinationMetaDataAsync()
         {
-            var csvFolderPath = _csvFileSettings.CsvPath;
-            var vaccinationMetaDataFilename = _csvFileSettings?.VaccinationMetadataFile;
-            var vaccinationMetaDataFile = Path.Combine(csvFolderPath ?? string.Empty, vaccinationMetaDataFilename ?? string.Empty);
+            var csvUrl = _csvFileSettings?.VaccinationMetadataFile;
 
-            if (File.Exists(vaccinationMetaDataFile))
+            if (!string.IsNullOrEmpty(csvUrl))
             {
-                var (vaccinationMetaData, numberOfRows) = _vaccinationMetaDataReaderService.ReadCsvFile(vaccinationMetaDataFile);
+                var csvFilename = Path.GetFileName(csvUrl);
+                var (vaccinationMetaData, numberOfRows) = await _vaccinationMetaDataReaderService.ReadCsvFile(csvUrl);
                 var rowsIntegrated = vaccinationMetaData.Count();
 
-                if (vaccinationMetaDataFilename != null)
+                var integrationModel = IntegrationRecordFactory.CreateIntegrationRecord(csvFilename, numberOfRows, rowsIntegrated);
+                await _integrationRepository.AddAsync(integrationModel);
+
+                foreach (var data in vaccinationMetaData)
                 {
-                    var integrationModel = IntegrationRecordFactory.CreateIntegrationRecord(vaccinationMetaDataFilename, numberOfRows, rowsIntegrated);
-                    await _integrationRepository.AddAsync(integrationModel);
-
-                    foreach (var data in vaccinationMetaData)
-                    {
-                        data.IntegrationId = integrationModel.Id;
-                    }
-
-                    await _vaccinationMetaDataRepository.AddVaccinationMetaDataRangeAsync(vaccinationMetaData);
+                    data.IntegrationId = integrationModel.Id;
                 }
+
+                await _vaccinationMetaDataRepository.AddVaccinationMetaDataRangeAsync(vaccinationMetaData);
             }
         }
 
         private async Task IntegrateWhoGlobalDataAsync()
         {
-            var csvFolderPath = _csvFileSettings.CsvPath;
-            var whoGlobalDataFilename = _csvFileSettings?.GlobalDataFile;
-            var whoGlobalDataFile = Path.Combine(csvFolderPath ?? string.Empty, whoGlobalDataFilename ?? string.Empty);
+            var csvUrl = _csvFileSettings?.GlobalDataFile;
 
-            if (File.Exists(whoGlobalDataFile))
+            if (!string.IsNullOrEmpty(csvUrl))
             {
-                var (whoGlobalData, numberOfRows) = _whoGlobalDataReaderService.ReadCsvFile(whoGlobalDataFile);
+                var csvFilename = Path.GetFileName(csvUrl);
+                var (whoGlobalData, numberOfRows) = await _whoGlobalDataReaderService.ReadCsvFile(csvUrl);
                 var rowsIntegrated = whoGlobalData.Count();
 
-                if (whoGlobalDataFilename != null)
+                var integrationModel = IntegrationRecordFactory.CreateIntegrationRecord(csvFilename, numberOfRows, rowsIntegrated);
+                await _integrationRepository.AddAsync(integrationModel);
+
+                foreach (var data in whoGlobalData)
                 {
-                    var integrationModel = IntegrationRecordFactory.CreateIntegrationRecord(whoGlobalDataFilename, numberOfRows, rowsIntegrated);
-                    await _integrationRepository.AddAsync(integrationModel);
-
-                    foreach (var data in whoGlobalData)
-                    {
-                        data.IntegrationId = integrationModel.Id;
-                    }
-
-                    await _whoGlobalDataRepository.AddWhoGlobalDataRangeAsync(whoGlobalData);
+                    data.IntegrationId = integrationModel.Id;
                 }
+
+                await _whoGlobalDataRepository.AddWhoGlobalDataRangeAsync(whoGlobalData);
             }
         }
 
         private async Task IntegrateWhoGlobalTableDataAsync()
         {
-            var csvFolderPath = _csvFileSettings.CsvPath;
-            var whoGlobalTableDataFilename = _csvFileSettings?.GlobalTableDataFile;
-            var whoGlobalTableDataFile = Path.Combine(csvFolderPath ?? string.Empty, whoGlobalTableDataFilename ?? string.Empty);
+            var csvUrl = _csvFileSettings?.GlobalTableDataFile;
 
-            if (File.Exists(whoGlobalTableDataFile))
+            if (!string.IsNullOrEmpty(csvUrl))
             {
-                var (whoGlobalTableData, numberOfRows) = _whoGlobalTableDataReaderService.ReadCsvFile(whoGlobalTableDataFile);
+                var csvFilename = Path.GetFileName(csvUrl);
+                var (whoGlobalTableData, numberOfRows) = await _whoGlobalTableDataReaderService.ReadCsvFile(csvUrl);
                 var rowsIntegrated = whoGlobalTableData.Count();
 
-                if (whoGlobalTableDataFilename != null)
+                var integrationModel = IntegrationRecordFactory.CreateIntegrationRecord(csvFilename, numberOfRows, rowsIntegrated);
+                await _integrationRepository.AddAsync(integrationModel);
+
+                foreach (var data in whoGlobalTableData)
                 {
-                    var integrationModel = IntegrationRecordFactory.CreateIntegrationRecord(whoGlobalTableDataFilename, numberOfRows, rowsIntegrated);
-                    await _integrationRepository.AddAsync(integrationModel);
-
-                    foreach (var data in whoGlobalTableData)
-                    {
-                        data.IntegrationId = integrationModel.Id;
-                    }
-
-                    await _whoGlobalTableDataRepository.AddWhoGlobalTableDataRangeAsync(whoGlobalTableData);
+                    data.IntegrationId = integrationModel.Id;
                 }
+
+                await _whoGlobalTableDataRepository.AddWhoGlobalTableDataRangeAsync(whoGlobalTableData);
+
             }
         }
     }

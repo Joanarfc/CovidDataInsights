@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace CDI.CovidDataManagement.API.Controllers
 {
     [ApiController]
-    [Route("api/csv-data")]
+    [Route("api/covid-data")]
     public class CsvDataController : ControllerBase
     {
         private readonly IFileIntegrationService _integrationService;
