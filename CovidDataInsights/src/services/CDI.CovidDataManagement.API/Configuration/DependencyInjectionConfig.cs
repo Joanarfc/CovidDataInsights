@@ -23,7 +23,11 @@ namespace CDI.CovidDataManagement.API.Configuration
             services.AddScoped<ApplicationDbContext>();
 
             // Register Services
-            services.AddScoped<IFileIntegrationService, FileIntegrationService>();
+            services.AddScoped<IVaccinationDataService, VaccinationDataService>();
+            services.AddScoped<IVaccinationMetaDataService, VaccinationMetaDataService>();
+            services.AddScoped<IWhoGlobalDataService, WhoGlobalDataService>();
+            services.AddScoped<IWhoGlobalTableDataService, WhoGlobalTableDataService>();
+
             services.AddScoped<ICsvFileReaderService<VaccinationDataModel>, CsvFileReaderService<VaccinationDataModel, VaccinationDataModelToCsvMap>>();
             services.AddScoped<ICsvFileReaderService<VaccinationMetaDataModel>, CsvFileReaderService<VaccinationMetaDataModel, VaccinationMetaDataModelToCsvMap>>();
             services.AddScoped<ICsvFileReaderService<WhoGlobalDataModel>, CsvFileReaderService<WhoGlobalDataModel, WhoGlobalDataModelToCsvMap>>();

@@ -7,10 +7,20 @@ namespace CDI.CovidDataManagement.API.Controllers
     [Route("api/covid-data")]
     public class CsvDataController : ControllerBase
     {
-        private readonly IFileIntegrationService _integrationService;
-        public CsvDataController(IFileIntegrationService integrationService)
+        private readonly IVaccinationDataService _vaccinationDataService;
+        private readonly IVaccinationMetaDataService _vaccinationMetaDataService;
+        private readonly IWhoGlobalDataService _whoGlobalDataService;
+        private readonly IWhoGlobalTableDataService _whoGlobalTableDataService;
+
+        public CsvDataController(IVaccinationDataService vaccinationDataService,
+                                 IVaccinationMetaDataService vaccinationMetaDataService,
+                                 IWhoGlobalDataService whoGlobalDataService,
+                                 IWhoGlobalTableDataService whoGlobalTableDataService)
         {
-            _integrationService = integrationService;
+            _vaccinationDataService = vaccinationDataService;
+            _vaccinationMetaDataService = vaccinationMetaDataService;
+            _whoGlobalDataService = whoGlobalDataService;
+            _whoGlobalTableDataService = whoGlobalTableDataService;
         }
 
         [HttpPost("covid-data-integration")]
@@ -18,7 +28,11 @@ namespace CDI.CovidDataManagement.API.Controllers
         {
             try
             {
-                await _integrationService.IntegrateCsvDataAsync();
+                await _vaccinationDataService.IntegrateVaccinationDataAsync();
+                await _vaccinationMetaDataService.IntegrateVaccinationMetaDataAsync();
+                await _whoGlobalDataService.IntegrateWhoGlobalDataAsync();
+                await _whoGlobalTableDataService.IntegrateWhoGlobalTableDataAsync();
+
                 return Ok();
             }
             catch (Exception ex)
