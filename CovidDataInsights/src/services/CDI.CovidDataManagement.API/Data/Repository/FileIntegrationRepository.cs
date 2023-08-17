@@ -8,14 +8,10 @@ namespace CDI.CovidDataManagement.API.Data.Repository
         Task<IEnumerable<IntegrationModel>> GetAll();
         Task AddAsync(IntegrationModel model);
     }
-    public class FileIntegrationRepository : IFileIntegrationRepository
+    public class FileIntegrationRepository : Repository<IntegrationModel>, IFileIntegrationRepository
     {
-        private readonly ApplicationDbContext _context;
-
-        public FileIntegrationRepository(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+        public FileIntegrationRepository(ApplicationDbContext context) : base(context)
+        {   }
 
         public async Task<IEnumerable<IntegrationModel>> GetAll()
         {
@@ -27,16 +23,6 @@ namespace CDI.CovidDataManagement.API.Data.Repository
         {
             _context.IntegrationData?.Add(model);
             await PersistData();
-        }
-
-        private async Task PersistData()
-        {
-            await _context.SaveChangesAsync();
-        }
-
-        public void Dispose()
-        {
-            _context?.Dispose();
         }
     }
 }

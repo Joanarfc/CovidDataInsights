@@ -5,17 +5,14 @@ namespace CDI.CovidDataManagement.API.Data.Repository
 {
     public interface IVaccinationDataRepository
     {
-        Task AddVaccinationDataRangeAsync(IEnumerable<VaccinationDataModel> vaccinationDataList);
+        Task<List<VaccinationDataModel>> GetAllAsync();
         Task<int> GetTotalCountAsync();
+        Task AddVaccinationDataRangeAsync(IEnumerable<VaccinationDataModel> vaccinationDataList);
     }
-    public class VaccinationDataRepository : IVaccinationDataRepository
+    public class VaccinationDataRepository : Repository<VaccinationDataModel>, IVaccinationDataRepository
     {
-        private readonly ApplicationDbContext _context;
-
-        public VaccinationDataRepository(ApplicationDbContext context)
-        {
-            _context = context;
-        }
+        public VaccinationDataRepository(ApplicationDbContext context) : base(context)
+        {   }
 
         public async Task<List<VaccinationDataModel>> GetAllAsync()
         {
@@ -33,14 +30,6 @@ namespace CDI.CovidDataManagement.API.Data.Repository
         {
             await (_context.VaccinationData?.AddRangeAsync(vaccinationDataList) ?? Task.CompletedTask);
             await PersistData();
-        }
-        private async Task PersistData()
-        {
-            await _context.SaveChangesAsync();
-        }
-        public void Dispose()
-        {
-            _context?.Dispose();
         }
     }
 }

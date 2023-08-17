@@ -5,16 +5,18 @@ namespace CDI.CovidDataManagement.API.Data.Repository
 {
     public interface IWhoGlobalTableDataRepository
     {
+        Task<List<WhoGlobalTableDataModel>> GetAllAsync();
         Task AddWhoGlobalTableDataRangeAsync(IEnumerable<WhoGlobalTableDataModel> whoGlobalTableDataList);
         Task<int> GetTotalCountAsync();
     }
-    public class WhoGlobalTableDataRepository : IWhoGlobalTableDataRepository
+    public class WhoGlobalTableDataRepository : Repository<WhoGlobalTableDataModel>, IWhoGlobalTableDataRepository
     {
-        private readonly ApplicationDbContext _context;
+        public WhoGlobalTableDataRepository(ApplicationDbContext context) : base(context)
+        { }
 
-        public WhoGlobalTableDataRepository(ApplicationDbContext context)
+        public async Task<List<WhoGlobalTableDataModel>> GetAllAsync()
         {
-            _context = context;
+            return await(_context.WhoGlobalTableData?.AsNoTracking().ToListAsync() ?? Task.FromResult(new List<WhoGlobalTableDataModel>()));
         }
         public async Task<int> GetTotalCountAsync()
         {
@@ -27,11 +29,6 @@ namespace CDI.CovidDataManagement.API.Data.Repository
         {
             await (_context.WhoGlobalTableData?.AddRangeAsync(whoGlobalTableDataList) ?? Task.CompletedTask);
             await PersistData();
-        }
-
-        private async Task PersistData()
-        {
-            await _context.SaveChangesAsync();
         }
     }
 }
