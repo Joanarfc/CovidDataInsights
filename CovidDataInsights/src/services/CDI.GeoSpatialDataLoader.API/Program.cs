@@ -8,9 +8,11 @@ builder.Configuration.SetBasePath(builder.Environment.ContentRootPath)
     .AddEnvironmentVariables();
 
 builder.Services.AddApiConfiguration(builder.Configuration);
+builder.Services.AddSwaggerConfiguration();
 
 var app = builder.Build();
 
+app.UseSwaggerConfiguration();
 app.UseApiConfiguration();
 
 app.Run();
