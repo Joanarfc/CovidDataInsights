@@ -15,4 +15,8 @@
 		</PackageReference>
 	</ItemGroup>
 
+	<ItemGroup>
+	  <ProjectReference Include="..\..\building blocks\CDI.Core\CDI.Core.csproj" />
+	</ItemGroup>
+
 </Project>
