@@ -1,4 +1,5 @@
 ﻿using CDI.GeoSpatialDataLoader.API.Data;
+using CDI.GeoSpatialDataLoader.API.Extensions;
 using Microsoft.EntityFrameworkCore;
 
 namespace CDI.GeoSpatialDataLoader.API.Configuration
@@ -11,6 +12,8 @@ namespace CDI.GeoSpatialDataLoader.API.Configuration
             options.UseNpgsql(configuration.GetConnectionString("DefaultConnection")));
 
             services.AddControllers();
+
+            services.Configure<GeoJsonFileSettings>(configuration.GetSection("GeoJsonFile"));
         }
         public static void UseApiConfiguration(this IApplicationBuilder app)
         {
