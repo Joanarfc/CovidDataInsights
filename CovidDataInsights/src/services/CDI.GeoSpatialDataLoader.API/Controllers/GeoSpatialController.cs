@@ -35,7 +35,7 @@ namespace CDI.GeoSpatialDataLoader.API.Controllers
             else
             {
                 _logger.LogInformation("Data loading and saving skipped.");
-                return NoContent();
+                return Ok();
             }
         }
 
