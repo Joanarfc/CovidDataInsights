@@ -1,6 +1,7 @@
 ﻿using CDI.GeoSpatialDataLoader.API.Data.Repository;
 using CDI.GeoSpatialDataLoader.API.Extensions;
 using CDI.GeoSpatialDataLoader.API.Models;
+using CDI.WebAPI.Core.Utils;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 
@@ -46,12 +47,12 @@ namespace CDI.GeoSpatialDataLoader.API.Services
             if (dbResult > 0)
             {
                 _logger.LogInformation("Data already loaded.");
-                return null;
+                return "Data is already loaded.";
             }
             else if (dbResult == 0)
             {
                 _logger.LogInformation("No data available in Countries table.");
-                return null;
+                throw new AppException("No data available in Countries table.");
             }
 
             // Load data from the Geo JSON file
@@ -66,7 +67,7 @@ namespace CDI.GeoSpatialDataLoader.API.Services
             else
             {
                 _logger.LogInformation("The file does not exist.");
-                return null;
+                throw new AppException("The file does not exist.");
             }
         }
 
@@ -94,31 +95,33 @@ namespace CDI.GeoSpatialDataLoader.API.Services
         {
             dynamic? jsonObj = JsonConvert.DeserializeObject(geoJsonData);
 
-            if (jsonObj != null)
+            if (jsonObj == null)
             {
-                int numberOfFeatures = jsonObj["features"].Count;
-                _logger.LogInformation("Number of features in the Geo JSON file: {numberOfFeatures}", numberOfFeatures);
+                throw new AppException("Failed to deserialize JSON data.");
+            }
 
-                foreach (var feature in jsonObj["features"])
-                {
-                    // Extract values from the Geo JSON file
-                    var geoSpatial = ExtractGeoSpatialModel(feature);
+            int numberOfFeatures = jsonObj["features"].Count;
+            _logger.LogInformation("Number of features in the Geo JSON file: {numberOfFeatures}", numberOfFeatures);
 
-                    _logger.LogInformation("Geo json data retrieved: " +
-                        $"Feature CLA = {geoSpatial.Featurecla} | " +
-                        $"Sovereignt = {geoSpatial.Sovereignt} | " +
-                        $"Type = {geoSpatial.Type} | " +
-                        $"Admin = {geoSpatial.Admin} | " +
-                        $"Name Long = {geoSpatial.NameLong} | " +
-                        $"Formal EN = {geoSpatial.FormalEN} | " +
-                        $"Name EN = {geoSpatial.NameEN} | " +
-                        $"Coordinates = {geoSpatial.Coordinates}");
+            foreach (var feature in jsonObj["features"])
+            {
+                // Extract values from the Geo JSON file
+                var geoSpatial = ExtractGeoSpatialModel(feature);
 
-                    _geoSpatialRepository.AddGeoSpatialData(geoSpatial);
+                _logger.LogInformation("Geo json data retrieved: " +
+                    $"Feature CLA = {geoSpatial.Featurecla} | " +
+                    $"Sovereignt = {geoSpatial.Sovereignt} | " +
+                    $"Type = {geoSpatial.Type} | " +
+                    $"Admin = {geoSpatial.Admin} | " +
+                    $"Name Long = {geoSpatial.NameLong} | " +
+                    $"Formal EN = {geoSpatial.FormalEN} | " +
+                    $"Name EN = {geoSpatial.NameEN} | " +
+                    $"Coordinates = {geoSpatial.Coordinates}");
 
-                    var rowsAffected = await _geoSpatialRepository.SaveChangesAsync();
-                    _logger.LogInformation("Number of rows added into 'Countries' table: {rowsAffected}", rowsAffected);
-                }
+                _geoSpatialRepository.AddGeoSpatialData(geoSpatial);
+
+                var rowsAffected = await _geoSpatialRepository.SaveChangesAsync();
+                _logger.LogInformation("Number of rows added into 'Countries' table: {rowsAffected}", rowsAffected);
             }
 
             var dbTotalRows = _geoSpatialRepository.GetCountriesCountFromDB();

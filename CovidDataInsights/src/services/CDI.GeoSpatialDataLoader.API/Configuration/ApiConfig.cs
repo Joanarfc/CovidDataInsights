@@ -1,5 +1,6 @@
 ﻿using CDI.GeoSpatialDataLoader.API.Data;
 using CDI.GeoSpatialDataLoader.API.Extensions;
+using CDI.WebAPI.Core.Middleware;
 using Microsoft.EntityFrameworkCore;
 
 namespace CDI.GeoSpatialDataLoader.API.Configuration
@@ -22,6 +23,8 @@ namespace CDI.GeoSpatialDataLoader.API.Configuration
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.UseMiddleware<CustomExceptionMiddleware>();
 
             app.UseEndpoints(endpoints =>
             {
