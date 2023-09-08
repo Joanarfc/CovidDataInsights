@@ -17,7 +17,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Core", "Core", "{CAAFFDBB-C
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CDI.Core", "src\building blocks\CDI.Core\CDI.Core.csproj", "{C884AD4D-C7C8-46FA-AFCA-7BD0DF465379}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CDI.GeoSpatialDataLoader.API", "src\services\CDI.GeoSpatialDataLoader.API\CDI.GeoSpatialDataLoader.API.csproj", "{EB106956-DB70-4B6A-ADB3-C58B685A3BDB}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CDI.GeoSpatialDataLoader.API", "src\services\CDI.GeoSpatialDataLoader.API\CDI.GeoSpatialDataLoader.API.csproj", "{EB106956-DB70-4B6A-ADB3-C58B685A3BDB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
