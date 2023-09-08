@@ -1,108 +1,61 @@
-﻿using CDI.GeoSpatialDataLoader.API.Extensions;
-using CDI.GeoSpatialDataLoader.API.Models;
+﻿using CDI.GeoSpatialDataLoader.API.Models;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 
 namespace CDI.GeoSpatialDataLoader.API.Data.Repository
 {
     public interface IGeoSpatialRepository
     {
-        Task<IEnumerable<GeoSpatialModel>> GetAll();
+        Task<IEnumerable<GeoSpatialModel>> GetAllAsync();
+        void AddGeoSpatialData(GeoSpatialModel geoSpatialModel);
+        Task<int> SaveChangesAsync();
+        int GetCountriesCountFromDB();
     }
     public class GeoSpatialRepository : IGeoSpatialRepository
     {
         private readonly ApplicationDataContext _context;
-        private readonly GeoJsonFileSettings _csvFileSettings;
+        private readonly ILogger<GeoSpatialRepository> _logger;
 
-        public GeoSpatialRepository(ApplicationDataContext context, 
-                                    IOptions<GeoJsonFileSettings> csvFileSettings)
+
+        public GeoSpatialRepository(ApplicationDataContext context,
+                                    ILogger<GeoSpatialRepository> logger)
         {
             _context = context;
-            _csvFileSettings = csvFileSettings.Value;
+            _logger = logger;
+            _logger.LogDebug(1, "NLog injected into GeoSpatialRepository");
+            _logger.LogDebug(1, "GeoSpatialRepository has been constructed");
         }
 
-        public async Task<IEnumerable<GeoSpatialModel>> GetAll()
+        public async Task<IEnumerable<GeoSpatialModel>> GetAllAsync()
         {
-            SaveData();
+            _logger.LogInformation("GetAll method started.");
 
             if (_context.Countries != null)
             {
+                _logger.LogInformation("Returning data from GetAll method.");
                 return await _context.Countries.ToListAsync();
             }
             else
             {
+                _logger.LogInformation("Returning empty data from GetAll method.");
                 return Enumerable.Empty<GeoSpatialModel>();
             }
         }
 
-        public void SaveData()
+        public int GetCountriesCountFromDB()
         {
-            // Check if the table is empty before we load the data. If not empty, skip the extract transform and load process
-            var db_result = _context.Countries?.ToList();
+            return _context.Countries?.ToList().Count ?? 0;
+        }
 
-            if (db_result?.Count == 0)
-            {
-                Console.WriteLine("No data in Countries table");
+        public void AddGeoSpatialData(GeoSpatialModel geoSpatialModel)
+        {
+            _context?.Countries?.Add(geoSpatialModel);
+        }
 
-                // Get the folder path and filenames from settings
-                var geojsonFolderPath = _csvFileSettings.GeoJsonPath;
+        public async Task<int> SaveChangesAsync()
+        {
+            _logger.LogInformation("SaveChanges method started.");
 
-                var geoJsonDataFilename = _csvFileSettings?.GeoJsonDataFile;
-
-                // Combine the folder path and filenames to get the full file paths
-                var geoJsonDataFile = Path.Combine(geojsonFolderPath ?? string.Empty, geoJsonDataFilename ?? string.Empty);
-
-                if (File.Exists(geoJsonDataFile))
-                {
-                    var geoJSON = File.ReadAllText(geoJsonDataFile);
-
-                    if (geoJSON != null)
-                    {
-                        dynamic? jsonObj = JsonConvert.DeserializeObject(geoJSON);
-
-                        if (jsonObj != null)
-                        {
-                            foreach (var feature in jsonObj["features"])
-                            {
-                                // Extract values from the file object using the fields
-                                string str_featurecla = feature["properties"]["featurecla"];
-                                string str_sovereignt = feature["properties"]["SOVEREIGNT"];
-                                string str_type = feature["properties"]["TYPE"];
-                                string str_admin = feature["properties"]["ADMIN"];
-                                string str_namelong = feature["properties"]["NAME_LONG"];
-                                string str_formal_en = feature["properties"]["FORMAL_EN"];
-                                string str_name_en = feature["properties"]["NAME_EN"];
-                                string str_geometry = feature["geometry"]["coordinates"].ToString(Newtonsoft.Json.Formatting.None);
-
-                                // Load the data into the table in database
-                                GeoSpatialModel geoSpatial = new()
-                                {
-                                    Featurecla = str_featurecla,
-                                    Sovereignt = str_sovereignt,
-                                    Type = str_type,
-                                    Admin = str_admin,
-                                    NameLong = str_namelong,
-                                    FormalEN = str_formal_en,
-                                    NameEN = str_name_en,
-                                    Coordinates = str_geometry
-                                };
-
-                                _context.Countries?.Add(geoSpatial);
-                                _context.SaveChanges();
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    Console.WriteLine("The file does not exist.");
-                }
-            }
-            else
-            {
-                Console.WriteLine("Data loaded.");
-            }
+            return await _context.SaveChangesAsync();
         }
     }
 }
