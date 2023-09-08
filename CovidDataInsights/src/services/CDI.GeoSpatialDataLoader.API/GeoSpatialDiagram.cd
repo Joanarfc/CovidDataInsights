@@ -1,0 +1,91 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="CDI.GeoSpatialDataLoader.API.Models.GeoSpatialModel">
+    <Position X="0.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAABICAAAAAAAAACAAAQAAIAAAACAAAQAAAAAAAAA=</HashCode>
+      <FileName>Models\GeoSpatialModel.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CDI.GeoSpatialDataLoader.API.Services.GeoSpatialService" BaseTypeListCollapsed="true">
+    <Position X="3.25" Y="2.25" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAEAAEAAAAAAAABAAAAAAAAAIAAAAAAAAAgAAABAQAA=</HashCode>
+      <FileName>Services\GeoSpatialService.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.315" />
+  </Class>
+  <Class Name="CDI.GeoSpatialDataLoader.API.Data.Repository.GeoSpatialRepository">
+    <Position X="6.25" Y="2.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>IAEQAAAAAAAABEAAAAAAAAAAIAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Repository\GeoSpatialRepository.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="CDI.GeoSpatialDataLoader.API.Data.ApplicationDataContext">
+    <Position X="0.75" Y="6.25" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAQAAEAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\ApplicationDataContext.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CDI.Core.DomainObjects.Entity">
+    <Position X="0.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="CDI.GeoSpatialDataLoader.API.Extensions.GeoJsonFileSettings">
+    <Position X="6" Y="6.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAA=</HashCode>
+      <FileName>Extensions\GeoJsonFileSettings.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CDI.GeoSpatialDataLoader.API.Controllers.GeoSpatialController">
+    <Position X="8.75" Y="1.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAAAAAAAAAAAAAAAoAAAAAAAAAAAAACAAAA=</HashCode>
+      <FileName>Controllers\GeoSpatialController.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Microsoft.AspNetCore.Mvc.ControllerBase" Collapsed="true">
+    <Position X="9" Y="0.5" Width="1.5" />
+    <TypeIdentifier />
+  </Class>
+  <Class Name="CDI.GeoSpatialDataLoader.API.Configuration.ApiConfig">
+    <Position X="3.25" Y="7" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAA=</HashCode>
+      <FileName>Configuration\ApiConfig.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CDI.GeoSpatialDataLoader.API.Configuration.DependencyInjectionConfig">
+    <Position X="5.75" Y="5.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Configuration\DependencyInjectionConfig.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CDI.GeoSpatialDataLoader.API.Configuration.SwaggerConfig">
+    <Position X="3.25" Y="5.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAGAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Configuration\SwaggerConfig.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Interface Name="CDI.GeoSpatialDataLoader.API.Services.IGeoSpatialService">
+    <Position X="3.5" Y="0.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAA=</HashCode>
+      <FileName>Services\GeoSpatialService.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Interface Name="CDI.GeoSpatialDataLoader.API.Data.Repository.IGeoSpatialRepository">
+    <Position X="6.25" Y="0.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>IAEQAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Data\Repository\GeoSpatialRepository.cs</FileName>
+    </TypeIdentifier>
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>
