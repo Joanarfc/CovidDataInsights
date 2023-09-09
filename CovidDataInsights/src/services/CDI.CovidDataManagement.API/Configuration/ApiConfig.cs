@@ -1,5 +1,6 @@
 ﻿using CDI.CovidDataManagement.API.Data;
 using CDI.CovidDataManagement.API.Extensions;
+using CDI.WebAPI.Core.Middleware;
 using Microsoft.EntityFrameworkCore;
 
 namespace CDI.CovidDataManagement.API.Configuration
@@ -22,6 +23,8 @@ namespace CDI.CovidDataManagement.API.Configuration
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.UseMiddleware<CustomExceptionMiddleware>();
 
             app.UseEndpoints(endpoints =>
             {
