@@ -2,8 +2,8 @@
 using CsvHelper.Configuration;
 using System.Globalization;
 using System.IO.Compression;
-using System.IO;
 using System.Text;
+using CDI.WebAPI.Core.Utils;
 
 namespace CDI.CovidDataManagement.API.Services
 {
@@ -58,7 +58,7 @@ namespace CDI.CovidDataManagement.API.Services
                 }
                 else
                 {
-                    throw new Exception($"Failed to fetch CSV from URL: {csvUrl}");
+                    throw new AppException($"Failed to fetch CSV from URL: {csvUrl}");
                 }
             }
 

@@ -20,6 +20,7 @@
 	
 	<ItemGroup>
 	  <ProjectReference Include="..\..\building blocks\CDI.Core\CDI.Core.csproj" />
+	  <ProjectReference Include="..\..\building blocks\CDI.WebAPI.Core\CDI.WebAPI.Core.csproj" />
 	</ItemGroup>
 
 </Project>
