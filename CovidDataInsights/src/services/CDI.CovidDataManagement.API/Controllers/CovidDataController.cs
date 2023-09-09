@@ -5,14 +5,14 @@ namespace CDI.CovidDataManagement.API.Controllers
 {
     [ApiController]
     [Route("api/covid-data")]
-    public class CsvDataController : ControllerBase
+    public class CovidDataController : ControllerBase
     {
         private readonly IVaccinationDataService _vaccinationDataService;
         private readonly IVaccinationMetaDataService _vaccinationMetaDataService;
         private readonly IWhoGlobalDataService _whoGlobalDataService;
         private readonly IWhoGlobalTableDataService _whoGlobalTableDataService;
 
-        public CsvDataController(IVaccinationDataService vaccinationDataService,
+        public CovidDataController(IVaccinationDataService vaccinationDataService,
                                  IVaccinationMetaDataService vaccinationMetaDataService,
                                  IWhoGlobalDataService whoGlobalDataService,
                                  IWhoGlobalTableDataService whoGlobalTableDataService)
@@ -24,21 +24,14 @@ namespace CDI.CovidDataManagement.API.Controllers
         }
 
         [HttpPost("covid-data-integration")]
-        public async Task<IActionResult> IntegrateCsvData()
+        public async Task<IActionResult> IntegrateCovidCsvData()
         {
-            try
-            {
                 await _vaccinationDataService.IntegrateVaccinationDataAsync();
                 await _vaccinationMetaDataService.IntegrateVaccinationMetaDataAsync();
                 await _whoGlobalDataService.IntegrateWhoGlobalDataAsync();
                 await _whoGlobalTableDataService.IntegrateWhoGlobalTableDataAsync();
 
                 return Ok();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, $"An error occurred while integrating CSV files: {ex.Message}");
-            }
         }
 
         [HttpGet("total-vaccination-data")]
