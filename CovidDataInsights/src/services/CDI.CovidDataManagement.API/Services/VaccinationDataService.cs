@@ -17,8 +17,8 @@ namespace CDI.CovidDataManagement.API.Services
         private readonly IVaccinationDataRepository _vaccinationDataRepository;
         private readonly IFileIntegrationRepository _integrationRepository;
         public VaccinationDataService(IOptions<CsvFileSettings> csvFileSettings,
-                                      ICsvFileReaderService<VaccinationDataModel> vaccinationDataReaderService, 
-                                      IVaccinationDataRepository vaccinationDataRepository, 
+                                      ICsvFileReaderService<VaccinationDataModel> vaccinationDataReaderService,
+                                      IVaccinationDataRepository vaccinationDataRepository,
                                       IFileIntegrationRepository integrationRepository)
         {
             _csvFileSettings = csvFileSettings.Value;
@@ -29,11 +29,10 @@ namespace CDI.CovidDataManagement.API.Services
 
         public async Task IntegrateVaccinationDataAsync()
         {
-            var csvUrl = _csvFileSettings?.VaccinationDataFile;
+            var (csvUrl, csvFilename) = ExtractFilename();
 
-            if (!string.IsNullOrEmpty(csvUrl))
+            if (!string.IsNullOrEmpty(csvFilename))
             {
-                var csvFilename = Path.GetFileName(csvUrl);
                 var (vaccinationData, numberOfRows) = await _vaccinationDataReaderService.ReadCsvFile(csvUrl);
                 var rowsIntegrated = vaccinationData.Count();
 
@@ -47,6 +46,22 @@ namespace CDI.CovidDataManagement.API.Services
 
                 await _vaccinationDataRepository.AddVaccinationDataRangeAsync(vaccinationData);
             }
+        }
+        private (string CsvUrl, string CsvFileName) ExtractFilename()
+        {
+            var csvUrl = _csvFileSettings?.VaccinationDataFile;
+            string csvFilename;
+
+            if (!string.IsNullOrEmpty(csvUrl))
+            {
+                csvFilename = Path.GetFileName(csvUrl);
+            }
+            else
+            {
+                throw new InvalidOperationException("CSV URL is null or empty.");
+            }
+
+            return (csvUrl, csvFilename);
         }
     }
 }
