@@ -1,4 +1,5 @@
 ﻿using CDI.CovidDataManagement.API.Data.Repository;
+using CDI.CovidDataManagement.API.DTO;
 using CDI.CovidDataManagement.API.Extensions;
 using CDI.CovidDataManagement.API.Factories;
 using CDI.CovidDataManagement.API.Models;
@@ -9,6 +10,7 @@ namespace CDI.CovidDataManagement.API.Services
     public interface IVaccinationDataService
     {
         Task IntegrateVaccinationDataAsync();
+        Task<CovidDataDto> GetTotalVaccinationDataAsync(string? country = null);
     }
     public class VaccinationDataService : IVaccinationDataService
     {
@@ -47,6 +49,30 @@ namespace CDI.CovidDataManagement.API.Services
                 await _vaccinationDataRepository.AddVaccinationDataRangeAsync(vaccinationData);
             }
         }
+        public async Task<CovidDataDto> GetTotalVaccinationDataAsync(string? country = null)
+        {
+            var (_, csvFilename) = ExtractFilename();
+
+            if (string.IsNullOrEmpty(csvFilename))
+            {
+                throw new InvalidOperationException("CSV filename is missing.");
+            }
+
+            var totalVaccineDoses = await _vaccinationDataRepository.GetTotalVaccineDosesAsync(csvFilename, country);
+            var totalPersonsVaccinatedAtLeastOneDose = await _vaccinationDataRepository.GetTotalPersonsVaccinatedAtLeastOneDoseAsync(csvFilename, country);
+            var totalPersonsVaccinatedWithCompletePrimarySeries = await _vaccinationDataRepository.GetTotalPersonsVaccinatedWithCompletePrimarySeriesAsync(csvFilename, country);
+
+            var region = string.IsNullOrWhiteSpace(country) ? "Global" : country;
+
+            return new CovidDataDto
+            {
+                Region = region,
+                TotalVaccineDoses = totalVaccineDoses,
+                TotalPersonsVaccinatedAtLeastOneDose = totalPersonsVaccinatedAtLeastOneDose,
+                TotalPersonsVaccinatedWithCompletePrimarySeries = totalPersonsVaccinatedWithCompletePrimarySeries
+            };
+        }
+
         private (string CsvUrl, string CsvFileName) ExtractFilename()
         {
             var csvUrl = _csvFileSettings?.VaccinationDataFile;
