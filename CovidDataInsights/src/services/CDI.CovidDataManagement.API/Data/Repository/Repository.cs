@@ -1,4 +1,7 @@
-﻿namespace CDI.CovidDataManagement.API.Data.Repository
+﻿#nullable disable
+using Microsoft.EntityFrameworkCore;
+
+namespace CDI.CovidDataManagement.API.Data.Repository
 {
     public class Repository<T> where T : class
     {
@@ -16,6 +19,20 @@
         public void Dispose()
         {
             _context?.Dispose();
+        }
+        protected async Task<Guid?> GetMaxIntegrationIdAsync(string filename)
+        {
+            return await _context.IntegrationData
+                .Where(id => id.FileName == filename)
+                .GroupBy(id => id.Id)
+                .Select(g => new
+                {
+                    IntegrationId = g.Key,
+                    MaxTimestamp = g.Max(id => id.IntegrationTimestamp)
+                })
+                .OrderByDescending(g => g.MaxTimestamp)
+                .Select(g => g.IntegrationId)
+                .FirstOrDefaultAsync();
         }
     }
 }

@@ -84,19 +84,5 @@ namespace CDI.CovidDataManagement.API.Data.Repository
 
             return totalPersonsVaccinatedWithCompletePrimarySeries;
         }
-        private async Task<Guid?> GetMaxIntegrationIdAsync(string filename)
-        {
-            return await _context.IntegrationData
-                .Where(id => id.FileName == filename)
-                .GroupBy(id => id.Id)
-                .Select(g => new
-                {
-                    IntegrationId = g.Key,
-                    MaxTimestamp = g.Max(id => id.IntegrationTimestamp)
-                })
-                .OrderByDescending(g => g.MaxTimestamp)
-                .Select(g => g.IntegrationId)
-                .FirstOrDefaultAsync();
-        }
     }
 }
