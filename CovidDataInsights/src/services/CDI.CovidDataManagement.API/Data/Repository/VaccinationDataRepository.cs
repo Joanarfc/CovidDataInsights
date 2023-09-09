@@ -37,9 +37,10 @@ namespace CDI.CovidDataManagement.API.Data.Repository
 
         public async Task<long?> GetTotalVaccineDosesAsync(string filename, string country = null)
         {
-            var query = _context.IntegrationData
-                .Where(id => id.FileName == filename)
-                .SelectMany(id => id.VaccinationData);
+            var maxIntegrationId = await GetMaxIntegrationIdAsync(filename);
+
+            var query = _context.VaccinationData
+                        .Where(vd => vd.IntegrationId == maxIntegrationId.Value);
 
             if (!string.IsNullOrEmpty(country))
             {
@@ -53,9 +54,10 @@ namespace CDI.CovidDataManagement.API.Data.Repository
 
         public async Task<long?> GetTotalPersonsVaccinatedAtLeastOneDoseAsync(string filename, string country = null)
         {
-            var query = _context.IntegrationData
-                .Where(id => id.FileName == filename)
-                .SelectMany(id => id.VaccinationData);
+            var maxIntegrationId = await GetMaxIntegrationIdAsync(filename);
+
+            var query = _context.VaccinationData
+                        .Where(vd => vd.IntegrationId == maxIntegrationId.Value);
 
             if (!string.IsNullOrEmpty(country))
             {
@@ -68,9 +70,10 @@ namespace CDI.CovidDataManagement.API.Data.Repository
         }
         public async Task<long?> GetTotalPersonsVaccinatedWithCompletePrimarySeriesAsync(string filename, string country = null)
         {
-            var query = _context.IntegrationData
-                .Where(id => id.FileName == filename)
-                .SelectMany(id => id.VaccinationData);
+            var maxIntegrationId = await GetMaxIntegrationIdAsync(filename);
+
+            var query = _context.VaccinationData
+                        .Where(vd => vd.IntegrationId == maxIntegrationId.Value);
 
             if (!string.IsNullOrEmpty(country))
             {
@@ -80,6 +83,20 @@ namespace CDI.CovidDataManagement.API.Data.Repository
             var totalPersonsVaccinatedWithCompletePrimarySeries = await query.SumAsync(vd => vd.PersonsLastDose);
 
             return totalPersonsVaccinatedWithCompletePrimarySeries;
+        }
+        private async Task<Guid?> GetMaxIntegrationIdAsync(string filename)
+        {
+            return await _context.IntegrationData
+                .Where(id => id.FileName == filename)
+                .GroupBy(id => id.Id)
+                .Select(g => new
+                {
+                    IntegrationId = g.Key,
+                    MaxTimestamp = g.Max(id => id.IntegrationTimestamp)
+                })
+                .OrderByDescending(g => g.MaxTimestamp)
+                .Select(g => g.IntegrationId)
+                .FirstOrDefaultAsync();
         }
     }
 }
