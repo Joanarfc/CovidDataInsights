@@ -40,5 +40,12 @@ namespace CDI.CovidDataManagement.API.Controllers
                 return StatusCode(500, $"An error occurred while integrating CSV files: {ex.Message}");
             }
         }
+
+        [HttpGet("total-vaccination-data")]
+        public async Task<ActionResult<long?>> GetTotalVaccinationData([FromQuery] string? country = null)
+        {
+            var totalVaccineDoses = await _vaccinationDataService.GetTotalVaccinationDataAsync(country);
+            return Ok(totalVaccineDoses);
+        }
     }
 }
