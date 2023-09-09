@@ -1,6 +1,7 @@
 ﻿using CDI.CovidDataManagement.API.Data;
 using CDI.CovidDataManagement.API.Data.Mappings;
 using CDI.CovidDataManagement.API.Data.Repository;
+using CDI.CovidDataManagement.API.Extensions;
 using CDI.CovidDataManagement.API.Models;
 using CDI.CovidDataManagement.API.Services;
 
@@ -32,6 +33,8 @@ namespace CDI.CovidDataManagement.API.Configuration
             services.AddScoped<ICsvFileReaderService<VaccinationMetaDataModel>, CsvFileReaderService<VaccinationMetaDataModel, VaccinationMetaDataModelToCsvMap>>();
             services.AddScoped<ICsvFileReaderService<WhoGlobalDataModel>, CsvFileReaderService<WhoGlobalDataModel, WhoGlobalDataModelToCsvMap>>();
             services.AddScoped<ICsvFileReaderService<WhoGlobalTableDataModel>, CsvFileReaderService<WhoGlobalTableDataModel, WhoGlobalTableDataModelToCsvMap>>();
+
+            services.AddScoped<CsvFileHelper>();
         }
     }
 }

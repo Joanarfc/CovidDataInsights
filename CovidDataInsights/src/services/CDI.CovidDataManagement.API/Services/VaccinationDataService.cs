@@ -18,45 +18,47 @@ namespace CDI.CovidDataManagement.API.Services
         private readonly ICsvFileReaderService<VaccinationDataModel> _vaccinationDataReaderService;
         private readonly IVaccinationDataRepository _vaccinationDataRepository;
         private readonly IFileIntegrationRepository _integrationRepository;
+        private readonly CsvFileHelper _csvFileHelper;
+
         public VaccinationDataService(IOptions<CsvFileSettings> csvFileSettings,
                                       ICsvFileReaderService<VaccinationDataModel> vaccinationDataReaderService,
                                       IVaccinationDataRepository vaccinationDataRepository,
-                                      IFileIntegrationRepository integrationRepository)
+                                      IFileIntegrationRepository integrationRepository,
+                                      CsvFileHelper csvFileHelper)
         {
             _csvFileSettings = csvFileSettings.Value;
             _vaccinationDataReaderService = vaccinationDataReaderService;
             _vaccinationDataRepository = vaccinationDataRepository;
             _integrationRepository = integrationRepository;
+            _csvFileHelper = csvFileHelper;
         }
 
         public async Task IntegrateVaccinationDataAsync()
         {
-            var (csvUrl, csvFilename) = ExtractFilename();
+            var csvUrl = GetCsvUrl();
 
-            if (!string.IsNullOrEmpty(csvFilename))
+            var csvFilename = csvUrl != null ? _csvFileHelper.ExtractFilename(csvUrl) : throw new FileNotFoundException("CSV URL is missing.");
+
+            var (vaccinationData, numberOfRows) = await _vaccinationDataReaderService.ReadCsvFile(csvUrl);
+            var rowsIntegrated = vaccinationData.Count();
+
+            var integrationModel = IntegrationRecordFactory.CreateIntegrationRecord(csvFilename, numberOfRows, rowsIntegrated);
+            await _integrationRepository.AddAsync(integrationModel);
+
+            foreach (var data in vaccinationData)
             {
-                var (vaccinationData, numberOfRows) = await _vaccinationDataReaderService.ReadCsvFile(csvUrl);
-                var rowsIntegrated = vaccinationData.Count();
-
-                var integrationModel = IntegrationRecordFactory.CreateIntegrationRecord(csvFilename, numberOfRows, rowsIntegrated);
-                await _integrationRepository.AddAsync(integrationModel);
-
-                foreach (var data in vaccinationData)
-                {
-                    data.IntegrationId = integrationModel.Id;
-                }
-
-                await _vaccinationDataRepository.AddVaccinationDataRangeAsync(vaccinationData);
+                data.IntegrationId = integrationModel.Id;
             }
+
+            await _vaccinationDataRepository.AddVaccinationDataRangeAsync(vaccinationData);
         }
         public async Task<CovidDataDto> GetTotalVaccinationDataAsync(string? country = null)
         {
-            var (_, csvFilename) = ExtractFilename();
+            var csvUrl = GetCsvUrl();
 
-            if (string.IsNullOrEmpty(csvFilename))
-            {
-                throw new InvalidOperationException("CSV filename is missing.");
-            }
+            var csvFilename = _csvFileHelper.ExtractFilename(csvUrl);
+
+            _csvFileHelper.ValidateCsvFilename(csvFilename);
 
             var totalVaccineDoses = await _vaccinationDataRepository.GetTotalVaccineDosesAsync(csvFilename, country);
             var totalPersonsVaccinatedAtLeastOneDose = await _vaccinationDataRepository.GetTotalPersonsVaccinatedAtLeastOneDoseAsync(csvFilename, country);
@@ -72,22 +74,16 @@ namespace CDI.CovidDataManagement.API.Services
                 TotalPersonsVaccinatedWithCompletePrimarySeries = totalPersonsVaccinatedWithCompletePrimarySeries
             };
         }
-
-        private (string CsvUrl, string CsvFileName) ExtractFilename()
+        private string GetCsvUrl()
         {
             var csvUrl = _csvFileSettings?.VaccinationDataFile;
-            string csvFilename;
 
-            if (!string.IsNullOrEmpty(csvUrl))
+            if (string.IsNullOrEmpty(csvUrl))
             {
-                csvFilename = Path.GetFileName(csvUrl);
-            }
-            else
-            {
-                throw new InvalidOperationException("CSV URL is null or empty.");
+                throw new FileNotFoundException("CSV URL is missing.");
             }
 
-            return (csvUrl, csvFilename);
+            return csvUrl;
         }
     }
 }
