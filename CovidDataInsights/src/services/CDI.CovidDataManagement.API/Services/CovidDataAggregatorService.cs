@@ -20,9 +20,9 @@ namespace CDI.CovidDataManagement.API.Services
 
         public async Task<CovidDataDto> GetCovidDataAsync(string? country = null)
         {
-            var vaccinationData = await _vaccinationDataService.GetTotalVaccinationDataAsync();
-            var casesData = await _whoGlobalTableDataService.GetTotalCasesDataAsync();
-            var deathsData = await _whoGlobalTableDataService.GetTotalDeathsDataAsync();
+            var vaccinationData = await _vaccinationDataService.GetTotalVaccinationDataAsync(country);
+            var casesData = await _whoGlobalTableDataService.GetTotalCasesDataAsync(country);
+            var deathsData = await _whoGlobalTableDataService.GetTotalDeathsDataAsync(country);
 
             var covidData = new CovidDataDto
             {

@@ -11,16 +11,19 @@ namespace CDI.CovidDataManagement.API.Controllers
         private readonly IVaccinationMetaDataService _vaccinationMetaDataService;
         private readonly IWhoGlobalDataService _whoGlobalDataService;
         private readonly IWhoGlobalTableDataService _whoGlobalTableDataService;
+        private readonly ICovidDataAggregatorService _covidDataAggregatorService;
 
         public CovidDataController(IVaccinationDataService vaccinationDataService,
                                  IVaccinationMetaDataService vaccinationMetaDataService,
                                  IWhoGlobalDataService whoGlobalDataService,
-                                 IWhoGlobalTableDataService whoGlobalTableDataService)
+                                 IWhoGlobalTableDataService whoGlobalTableDataService,
+                                 ICovidDataAggregatorService covidDataAggregatorService)
         {
             _vaccinationDataService = vaccinationDataService;
             _vaccinationMetaDataService = vaccinationMetaDataService;
             _whoGlobalDataService = whoGlobalDataService;
             _whoGlobalTableDataService = whoGlobalTableDataService;
+            _covidDataAggregatorService = covidDataAggregatorService;
         }
 
         [HttpPost("covid-data-integration")]
@@ -34,10 +37,10 @@ namespace CDI.CovidDataManagement.API.Controllers
                 return Ok();
         }
 
-        [HttpGet("total-vaccination-data")]
-        public async Task<ActionResult<long?>> GetTotalVaccinationData([FromQuery] string? country = null)
+        [HttpGet("total-covid-data")]
+        public async Task<ActionResult<long?>> GetTotalCovidData([FromQuery] string? country = null)
         {
-            var totalVaccineDoses = await _vaccinationDataService.GetTotalVaccinationDataAsync(country);
+            var totalVaccineDoses = await _covidDataAggregatorService.GetCovidDataAsync(country);
             return Ok(totalVaccineDoses);
         }
     }
