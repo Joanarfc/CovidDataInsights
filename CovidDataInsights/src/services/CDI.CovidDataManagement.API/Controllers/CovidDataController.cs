@@ -7,34 +7,19 @@ namespace CDI.CovidDataManagement.API.Controllers
     [Route("api/covid-data")]
     public class CovidDataController : ControllerBase
     {
-        private readonly IVaccinationDataService _vaccinationDataService;
-        private readonly IVaccinationMetaDataService _vaccinationMetaDataService;
-        private readonly IWhoGlobalDataService _whoGlobalDataService;
-        private readonly IWhoGlobalTableDataService _whoGlobalTableDataService;
         private readonly ICovidDataAggregatorService _covidDataAggregatorService;
 
-        public CovidDataController(IVaccinationDataService vaccinationDataService,
-                                 IVaccinationMetaDataService vaccinationMetaDataService,
-                                 IWhoGlobalDataService whoGlobalDataService,
-                                 IWhoGlobalTableDataService whoGlobalTableDataService,
-                                 ICovidDataAggregatorService covidDataAggregatorService)
+        public CovidDataController(ICovidDataAggregatorService covidDataAggregatorService)
         {
-            _vaccinationDataService = vaccinationDataService;
-            _vaccinationMetaDataService = vaccinationMetaDataService;
-            _whoGlobalDataService = whoGlobalDataService;
-            _whoGlobalTableDataService = whoGlobalTableDataService;
             _covidDataAggregatorService = covidDataAggregatorService;
         }
 
         [HttpPost("covid-data-integration")]
         public async Task<IActionResult> IntegrateCovidCsvData()
         {
-                await _vaccinationDataService.IntegrateVaccinationDataAsync();
-                await _vaccinationMetaDataService.IntegrateVaccinationMetaDataAsync();
-                await _whoGlobalDataService.IntegrateWhoGlobalDataAsync();
-                await _whoGlobalTableDataService.IntegrateWhoGlobalTableDataAsync();
+            await _covidDataAggregatorService.IntegrateCovidCsvDataAsync();
 
-                return Ok();
+            return Ok();
         }
 
         [HttpGet("total-covid-data")]
