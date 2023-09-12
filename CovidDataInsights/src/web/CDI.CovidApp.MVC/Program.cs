@@ -8,6 +8,7 @@ builder.Configuration.SetBasePath(builder.Environment.ContentRootPath)
     .AddEnvironmentVariables();
 
 builder.Services.AddMvcConfiguration(builder.Configuration);
+builder.Services.RegisterServices(builder.Configuration);
 
 var app = builder.Build();
 
