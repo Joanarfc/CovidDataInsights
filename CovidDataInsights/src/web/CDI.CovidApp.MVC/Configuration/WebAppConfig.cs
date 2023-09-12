@@ -1,4 +1,6 @@
-﻿namespace CDI.CovidApp.MVC.Configuration
+﻿using CDI.CovidApp.MVC.Extensions;
+
+namespace CDI.CovidApp.MVC.Configuration
 {
     public static class WebAppConfig
     {
@@ -6,6 +8,7 @@
         {
             services.AddControllersWithViews();
 
+            services.Configure<AppSettings>(configuration.GetSection("AppSettings"));
         }
         public static void UseMvcConfiguration(this IApplicationBuilder app, IHostEnvironment env)
         {
@@ -26,7 +29,7 @@
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=Home}/{action=Index}/{id?}");
+                    pattern: "{controller=CovidData}/{action=Index}/{country?}");
             });
         }
     }
