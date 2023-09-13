@@ -23,7 +23,7 @@ namespace CDI.CovidApp.MVC.Services
         {
             var response = await _httpClient.GetAsync($"/api/covid-data/total-covid-data?country={country}");
 
-            return await DeserializeObjectResponse<CovidDataViewModel>(response);
+            return await DeserializeJsonSingleObjectResponse<CovidDataViewModel>(response);
         }
     }
 }
