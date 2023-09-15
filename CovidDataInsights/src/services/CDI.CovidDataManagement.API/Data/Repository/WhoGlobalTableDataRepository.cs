@@ -9,10 +9,10 @@ namespace CDI.CovidDataManagement.API.Data.Repository
         Task AddWhoGlobalTableDataRangeAsync(IEnumerable<WhoGlobalTableDataModel> whoGlobalTableDataList);
         Task<List<WhoGlobalTableDataModel>> GetAllAsync();
         Task<int> GetTotalCountAsync();
-        Task<int?> GetNewCasesLast7DaysAsync(string filename, string country = null);
-        Task<long?> GetCumulativeCasesAsync(string filename, string country);
-        Task<int?> GetNewDeathsLast7DaysAsync(string filename, string country = null);
-        Task<long?> GetCumulativeDeathsAsync(string filename, string country);
+        Task<int?> GetNewCasesLast7DaysByCountryAsync(string filename, string country = null);
+        Task<long?> GetCumulativeCasesByCountryAsync(string filename, string country);
+        Task<int?> GetNewDeathsLast7DaysByCountryAsync(string filename, string country = null);
+        Task<long?> GetCumulativeDeathsByCountryAsync(string filename, string country);
     }
     public class WhoGlobalTableDataRepository : Repository<WhoGlobalTableDataModel>, IWhoGlobalTableDataRepository
     {
@@ -35,7 +35,7 @@ namespace CDI.CovidDataManagement.API.Data.Repository
             return totalCount;
         }
         
-        public async Task<int?> GetNewCasesLast7DaysAsync(string filename, string country = null)
+        public async Task<int?> GetNewCasesLast7DaysByCountryAsync(string filename, string country = null)
         {
             var maxIntegrationId = await GetMaxIntegrationIdAsync(filename);
 
@@ -56,7 +56,7 @@ namespace CDI.CovidDataManagement.API.Data.Repository
             return newCasesLast7Days;
         }
 
-        public async Task<long?> GetCumulativeCasesAsync(string filename, string country)
+        public async Task<long?> GetCumulativeCasesByCountryAsync(string filename, string country)
         {
             var maxIntegrationId = await GetMaxIntegrationIdAsync(filename);
 
@@ -76,7 +76,7 @@ namespace CDI.CovidDataManagement.API.Data.Repository
 
             return newCasesLast7Days;
         }
-        public async Task<int?> GetNewDeathsLast7DaysAsync(string filename, string country = null)
+        public async Task<int?> GetNewDeathsLast7DaysByCountryAsync(string filename, string country = null)
         {
             var maxIntegrationId = await GetMaxIntegrationIdAsync(filename);
 
@@ -96,7 +96,7 @@ namespace CDI.CovidDataManagement.API.Data.Repository
 
             return newCasesLast7Days;
         }
-        public async Task<long?> GetCumulativeDeathsAsync(string filename, string country)
+        public async Task<long?> GetCumulativeDeathsByCountryAsync(string filename, string country)
         {
             var maxIntegrationId = await GetMaxIntegrationIdAsync(filename);
 

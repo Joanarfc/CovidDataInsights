@@ -22,10 +22,10 @@ namespace CDI.CovidDataManagement.API.Controllers
             return Ok();
         }
 
-        [HttpGet("total-covid-data")]
-        public async Task<ActionResult<long?>> GetTotalCovidData([FromQuery] string? country = null)
+        [HttpGet("covid-data-by-country")]
+        public async Task<ActionResult<long?>> GetTotalCovidDataByCountry([FromQuery] string? country = null)
         {
-            var totalVaccineDoses = await _covidDataAggregatorService.GetCovidDataAsync(country);
+            var totalVaccineDoses = await _covidDataAggregatorService.GetCovidDataByCountryAsync(country);
             return Ok(totalVaccineDoses);
         }
     }

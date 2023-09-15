@@ -5,7 +5,7 @@ namespace CDI.CovidDataManagement.API.Services
     public interface ICovidDataAggregatorService
     {
         Task IntegrateCovidCsvDataAsync();
-        Task<CovidDataDto> GetCovidDataAsync(string? country = null);
+        Task<CovidDataDto> GetCovidDataByCountryAsync(string? country = null);
     }
     public class CovidDataAggregatorService : ICovidDataAggregatorService
     {
@@ -32,11 +32,11 @@ namespace CDI.CovidDataManagement.API.Services
             await _whoGlobalTableDataService.IntegrateWhoGlobalTableDataAsync();
         }
 
-        public async Task<CovidDataDto> GetCovidDataAsync(string? country = null)
+        public async Task<CovidDataDto> GetCovidDataByCountryAsync(string? country = null)
         {
-            var vaccinationData = await _vaccinationDataService.GetTotalVaccinationDataAsync(country);
-            var casesData = await _whoGlobalTableDataService.GetTotalCasesDataAsync(country);
-            var deathsData = await _whoGlobalTableDataService.GetTotalDeathsDataAsync(country);
+            var vaccinationData = await _vaccinationDataService.GetVaccinationDataByCountryAsync(country);
+            var casesData = await _whoGlobalTableDataService.GetTotalCasesDataByCountryAsync(country);
+            var deathsData = await _whoGlobalTableDataService.GetTotalDeathsDataByCountryAsync(country);
 
             var covidData = new CovidDataDto
             {
