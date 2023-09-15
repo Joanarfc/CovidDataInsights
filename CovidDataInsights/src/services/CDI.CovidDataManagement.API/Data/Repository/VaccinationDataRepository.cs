@@ -8,6 +8,7 @@ namespace CDI.CovidDataManagement.API.Data.Repository
     {
         Task AddVaccinationDataRangeAsync(IEnumerable<VaccinationDataModel> vaccinationDataList);
         Task<List<VaccinationDataModel>> GetAllAsync();
+        Task<List<string>> GetAllCountriesAsync();
         Task<int> GetTotalCountAsync();
         Task<long?> GetVaccineDosesByCountryAsync(string filename, string country = null);
         Task<long?> GetPersonsVaccinatedAtLeastOneDoseByCountryAsync(string filename, string country = null);
@@ -26,6 +27,14 @@ namespace CDI.CovidDataManagement.API.Data.Repository
         public async Task<List<VaccinationDataModel>> GetAllAsync()
         {
             return await (_context.VaccinationData?.AsNoTracking().ToListAsync() ?? Task.FromResult(new List<VaccinationDataModel>()));
+        }
+        public async Task<List<string>> GetAllCountriesAsync()
+        {
+            var countries = await _context.VaccinationData
+                .Select(c => c.Country)
+                .ToListAsync();
+
+            return countries;
         }
 
         public async Task<int> GetTotalCountAsync()

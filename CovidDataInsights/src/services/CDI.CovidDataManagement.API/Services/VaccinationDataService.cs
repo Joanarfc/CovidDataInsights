@@ -11,6 +11,7 @@ namespace CDI.CovidDataManagement.API.Services
     {
         Task IntegrateVaccinationDataAsync();
         Task<CovidDataDto> GetVaccinationDataByCountryAsync(string? country = null);
+        Task<List<string>> GetAllCountriesAsync();
     }
     public class VaccinationDataService : IVaccinationDataService
     {
@@ -74,6 +75,13 @@ namespace CDI.CovidDataManagement.API.Services
                 TotalPersonsVaccinatedWithCompletePrimarySeries = totalPersonsVaccinatedWithCompletePrimarySeries
             };
         }
+        public async Task<List<string>> GetAllCountriesAsync()
+        {
+            var countries = await _vaccinationDataRepository.GetAllCountriesAsync();
+
+            return countries;
+        }
+
         private string GetCsvUrl()
         {
             var csvUrl = _csvFileSettings?.VaccinationDataFile;
