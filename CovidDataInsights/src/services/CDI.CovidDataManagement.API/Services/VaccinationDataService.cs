@@ -10,7 +10,7 @@ namespace CDI.CovidDataManagement.API.Services
     public interface IVaccinationDataService
     {
         Task IntegrateVaccinationDataAsync();
-        Task<CovidDataDto> GetTotalVaccinationDataAsync(string? country = null);
+        Task<CovidDataDto> GetVaccinationDataByCountryAsync(string? country = null);
     }
     public class VaccinationDataService : IVaccinationDataService
     {
@@ -52,7 +52,7 @@ namespace CDI.CovidDataManagement.API.Services
 
             await _vaccinationDataRepository.AddVaccinationDataRangeAsync(vaccinationData);
         }
-        public async Task<CovidDataDto> GetTotalVaccinationDataAsync(string? country = null)
+        public async Task<CovidDataDto> GetVaccinationDataByCountryAsync(string? country = null)
         {
             var csvUrl = GetCsvUrl();
 
@@ -60,9 +60,9 @@ namespace CDI.CovidDataManagement.API.Services
 
             _csvFileHelper.ValidateCsvFilename(csvFilename);
 
-            var totalVaccineDoses = await _vaccinationDataRepository.GetTotalVaccineDosesAsync(csvFilename, country);
-            var totalPersonsVaccinatedAtLeastOneDose = await _vaccinationDataRepository.GetTotalPersonsVaccinatedAtLeastOneDoseAsync(csvFilename, country);
-            var totalPersonsVaccinatedWithCompletePrimarySeries = await _vaccinationDataRepository.GetTotalPersonsVaccinatedWithCompletePrimarySeriesAsync(csvFilename, country);
+            var totalVaccineDoses = await _vaccinationDataRepository.GetVaccineDosesByCountryAsync(csvFilename, country);
+            var totalPersonsVaccinatedAtLeastOneDose = await _vaccinationDataRepository.GetPersonsVaccinatedAtLeastOneDoseByCountryAsync(csvFilename, country);
+            var totalPersonsVaccinatedWithCompletePrimarySeries = await _vaccinationDataRepository.GetPersonsVaccinatedWithCompletePrimarySeriesByCountryAsync(csvFilename, country);
 
             var region = string.IsNullOrWhiteSpace(country) ? "Global" : country;
 

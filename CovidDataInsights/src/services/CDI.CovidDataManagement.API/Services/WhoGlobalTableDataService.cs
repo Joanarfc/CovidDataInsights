@@ -10,8 +10,8 @@ namespace CDI.CovidDataManagement.API.Services
     public interface IWhoGlobalTableDataService
     {
         Task IntegrateWhoGlobalTableDataAsync();
-        Task<CovidDataDto> GetTotalCasesDataAsync(string? country = null);
-        Task<CovidDataDto> GetTotalDeathsDataAsync(string? country = null);
+        Task<CovidDataDto> GetTotalCasesDataByCountryAsync(string? country = null);
+        Task<CovidDataDto> GetTotalDeathsDataByCountryAsync(string? country = null);
     }
     public class WhoGlobalTableDataService : IWhoGlobalTableDataService
     {
@@ -55,7 +55,7 @@ namespace CDI.CovidDataManagement.API.Services
 
             await _whoGlobalTableDataRepository.AddWhoGlobalTableDataRangeAsync(whoGlobalTableData);
         }
-        public async Task<CovidDataDto> GetTotalCasesDataAsync(string? country = null)
+        public async Task<CovidDataDto> GetTotalCasesDataByCountryAsync(string? country = null)
         {
             var csvUrl = GetCsvUrl();
 
@@ -63,8 +63,8 @@ namespace CDI.CovidDataManagement.API.Services
 
             _csvFileHelper.ValidateCsvFilename(csvFilename);
 
-            var totalNewCasesLast7Days = await _whoGlobalTableDataRepository.GetNewCasesLast7DaysAsync(csvFilename, country);
-            var totalCumulativeCases = await _whoGlobalTableDataRepository.GetCumulativeCasesAsync(csvFilename, country);
+            var totalNewCasesLast7Days = await _whoGlobalTableDataRepository.GetNewCasesLast7DaysByCountryAsync(csvFilename, country);
+            var totalCumulativeCases = await _whoGlobalTableDataRepository.GetCumulativeCasesByCountryAsync(csvFilename, country);
 
             var region = string.IsNullOrWhiteSpace(country) ? "Global" : country;
 
@@ -75,7 +75,7 @@ namespace CDI.CovidDataManagement.API.Services
                 CumulativeCases = totalCumulativeCases
             };
         }
-        public async Task<CovidDataDto> GetTotalDeathsDataAsync(string? country = null)
+        public async Task<CovidDataDto> GetTotalDeathsDataByCountryAsync(string? country = null)
         {
             var csvUrl = GetCsvUrl();
 
@@ -83,8 +83,8 @@ namespace CDI.CovidDataManagement.API.Services
 
             _csvFileHelper.ValidateCsvFilename(csvFilename);
 
-            var totalNewDeathsLast7Days = await _whoGlobalTableDataRepository.GetNewDeathsLast7DaysAsync(csvFilename, country);
-            var totalCumulativeDeaths = await _whoGlobalTableDataRepository.GetCumulativeDeathsAsync(csvFilename, country);
+            var totalNewDeathsLast7Days = await _whoGlobalTableDataRepository.GetNewDeathsLast7DaysByCountryAsync(csvFilename, country);
+            var totalCumulativeDeaths = await _whoGlobalTableDataRepository.GetCumulativeDeathsByCountryAsync(csvFilename, country);
 
             var region = string.IsNullOrWhiteSpace(country) ? "Global" : country;
 

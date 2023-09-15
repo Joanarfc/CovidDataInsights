@@ -9,9 +9,9 @@ namespace CDI.CovidDataManagement.API.Data.Repository
         Task AddVaccinationDataRangeAsync(IEnumerable<VaccinationDataModel> vaccinationDataList);
         Task<List<VaccinationDataModel>> GetAllAsync();
         Task<int> GetTotalCountAsync();
-        Task<long?> GetTotalVaccineDosesAsync(string filename, string country = null);
-        Task<long?> GetTotalPersonsVaccinatedAtLeastOneDoseAsync(string filename, string country = null);
-        Task<long?> GetTotalPersonsVaccinatedWithCompletePrimarySeriesAsync(string filename, string country = null);
+        Task<long?> GetVaccineDosesByCountryAsync(string filename, string country = null);
+        Task<long?> GetPersonsVaccinatedAtLeastOneDoseByCountryAsync(string filename, string country = null);
+        Task<long?> GetPersonsVaccinatedWithCompletePrimarySeriesByCountryAsync(string filename, string country = null);
     }
     public class VaccinationDataRepository : Repository<VaccinationDataModel>, IVaccinationDataRepository
     {
@@ -35,7 +35,7 @@ namespace CDI.CovidDataManagement.API.Data.Repository
             return totalCount;
         }
 
-        public async Task<long?> GetTotalVaccineDosesAsync(string filename, string country = null)
+        public async Task<long?> GetVaccineDosesByCountryAsync(string filename, string country = null)
         {
             var maxIntegrationId = await GetMaxIntegrationIdAsync(filename);
 
@@ -52,7 +52,7 @@ namespace CDI.CovidDataManagement.API.Data.Repository
             return totalVaccineDoses;
         }
 
-        public async Task<long?> GetTotalPersonsVaccinatedAtLeastOneDoseAsync(string filename, string country = null)
+        public async Task<long?> GetPersonsVaccinatedAtLeastOneDoseByCountryAsync(string filename, string country = null)
         {
             var maxIntegrationId = await GetMaxIntegrationIdAsync(filename);
 
@@ -68,7 +68,7 @@ namespace CDI.CovidDataManagement.API.Data.Repository
 
             return totalPersonsVaccinatedAtLeastOneDose;
         }
-        public async Task<long?> GetTotalPersonsVaccinatedWithCompletePrimarySeriesAsync(string filename, string country = null)
+        public async Task<long?> GetPersonsVaccinatedWithCompletePrimarySeriesByCountryAsync(string filename, string country = null)
         {
             var maxIntegrationId = await GetMaxIntegrationIdAsync(filename);
 
