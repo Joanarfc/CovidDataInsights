@@ -6,7 +6,8 @@ namespace CDI.CovidApp.MVC.Services
 {
     public interface ICovidDataService
     {
-        Task<CovidDataViewModel> GetTotalCovidDataByCountry(string? country = null);
+        Task<CovidDataViewModel> GetTotalCovidDataByCountryAsync(string? country = null);
+        Task<List<CovidDataViewModel>?> GetAllTotalCovidDataAsync();
     }
     public class CovidDataService : Service, ICovidDataService
     {
@@ -19,11 +20,17 @@ namespace CDI.CovidApp.MVC.Services
             _httpClient = httpClient;
         }
 
-        public async Task<CovidDataViewModel> GetTotalCovidDataByCountry(string? country = null)
+        public async Task<CovidDataViewModel> GetTotalCovidDataByCountryAsync(string? country = null)
         {
             var response = await _httpClient.GetAsync($"/api/covid-data/by-country?country={country}");
 
             return await DeserializeJsonSingleObjectResponse<CovidDataViewModel>(response);
+        }
+        public async Task<List<CovidDataViewModel>?> GetAllTotalCovidDataAsync()
+        {
+            var response = await _httpClient.GetAsync($"/api/covid-data/all");
+
+            return await DeserializeJsonArrayObjectResponse<CovidDataViewModel>(response);
         }
     }
 }
