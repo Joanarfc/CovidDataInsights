@@ -16,10 +16,18 @@ namespace CDI.CovidApp.MVC.Controllers
         [Route("covid-data/by-country")]
         public async Task<IActionResult> Index([FromQuery] string? country = null)
         {
-            var covidData = await _covidDataService.GetTotalCovidDataByCountry(country);
+            var covidData = await _covidDataService.GetTotalCovidDataByCountryAsync(country);
             ViewBag.Country = country;
 
             return Ok(covidData);
+        }
+        [HttpGet]
+        [Route("covid-data/all")]
+        public async Task<IActionResult> GetAllTotalCovidDataAsync()
+        {
+            var allCovidData = await _covidDataService.GetAllTotalCovidDataAsync();
+
+            return Ok(allCovidData);
         }
     }
 }
