@@ -28,5 +28,11 @@ namespace CDI.CovidDataManagement.API.Controllers
             var totalVaccineDoses = await _covidDataAggregatorService.GetCovidDataByCountryAsync(country);
             return Ok(totalVaccineDoses);
         }
+        [HttpGet("all-covid-data")]
+        public async Task<ActionResult<long?>> GetAllCovidData()
+        {
+            var totalVaccineDoses = await _covidDataAggregatorService.GetAllCovidDataAsync();
+            return Ok(totalVaccineDoses);
+        }
     }
 }
