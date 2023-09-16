@@ -14,7 +14,7 @@ namespace CDI.CovidDataManagement.API.Controllers
             _covidDataAggregatorService = covidDataAggregatorService;
         }
 
-        [HttpPost("covid-data-integration")]
+        [HttpPost("integration")]
         public async Task<IActionResult> IntegrateCovidCsvData()
         {
             await _covidDataAggregatorService.IntegrateCovidCsvDataAsync();
@@ -22,13 +22,13 @@ namespace CDI.CovidDataManagement.API.Controllers
             return Ok();
         }
 
-        [HttpGet("covid-data-by-country")]
+        [HttpGet("by-country")]
         public async Task<ActionResult<long?>> GetTotalCovidDataByCountry([FromQuery] string? country = null)
         {
             var totalVaccineDoses = await _covidDataAggregatorService.GetCovidDataByCountryAsync(country);
             return Ok(totalVaccineDoses);
         }
-        [HttpGet("all-covid-data")]
+        [HttpGet("all")]
         public async Task<ActionResult<long?>> GetAllCovidData()
         {
             var totalVaccineDoses = await _covidDataAggregatorService.GetAllCovidDataAsync();
