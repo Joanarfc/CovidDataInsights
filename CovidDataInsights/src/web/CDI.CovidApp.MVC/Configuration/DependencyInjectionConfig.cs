@@ -9,6 +9,7 @@ namespace CDI.CovidApp.MVC.Configuration
             // Register Services
             services.AddHttpClient<ICovidDataService, CovidDataService>();
             services.AddHttpClient<IGeoJsonDataService, GeoJsonDataService>();
+            services.AddScoped<ICovidWithGeoJsonDataService, CovidWithGeoJsonDataService>();
         }
     }
 }
