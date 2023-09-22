@@ -14,7 +14,7 @@ namespace CDI.CovidApp.MVC.Controllers
             _covidWithGeoJsonDataService = covidWithGeoJsonDataService;
         }
         [HttpGet]
-        [Route("")]
+        //[Route("")]
         [Route("covid-data/by-country")]
         public async Task<IActionResult> Index([FromQuery] string? country = null)
         {
