@@ -29,7 +29,7 @@ namespace CDI.CovidApp.MVC.Configuration
             {
                 endpoints.MapControllerRoute(
                     name: "default",
-                    pattern: "{controller=CovidData}/{action=Index}/{country?}");
+                    pattern: "{controller=Home}/{action=Index}/{country?}");
             });
         }
     }
