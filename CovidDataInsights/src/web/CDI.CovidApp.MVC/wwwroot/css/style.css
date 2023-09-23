@@ -1,0 +1,15 @@
+#map {
+    height: calc(100vh - 0px);
+}
+
+.leaflet-control-layers {
+    float: right;
+    top: 500px;
+    right: 0;
+    /* margin-left:-200px; */
+    position: absolute;
+    background: rgba(0,0,0,0.85);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+    color: whitesmoke;
+}

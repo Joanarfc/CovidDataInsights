@@ -2,7 +2,15 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://docs.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<!-- Import Leaflet CSS -->
+<link rel="stylesheet" href="~/app/leaflet/leaflet.css" />
+<link href="~/css/style.css" rel="stylesheet" />
+
+
+<div id="map" style="width:100%"></div>
+
+<!-- Import Leaflet JS -->
+<script src="~/app/jquery/dist/jquery.min.js"></script>
+<script src="~/app/leaflet/leaflet.js"></script>
+<script src="~/app/extscripts/js/Chart.js"></script>
+<script src="~/js/site.js"></script> 
