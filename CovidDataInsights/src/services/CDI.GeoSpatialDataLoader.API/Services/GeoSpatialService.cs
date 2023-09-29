@@ -52,7 +52,6 @@ namespace CDI.GeoSpatialDataLoader.API.Services
             else if (dbResult == 0)
             {
                 _logger.LogInformation("No data available in Countries table.");
-                throw new AppException("No data available in Countries table.");
             }
 
             // Load data from the Geo JSON file
