@@ -51,6 +51,12 @@ namespace CDI.CovidDataManagement.API.Data
                 entity.Property(e => e.RowsIntegrated)
                 .HasPrecision(7)
                 .IsRequired();
+
+                // Create an index for the Id
+                entity.HasIndex(e => e.Id).IsUnique(false).HasDatabaseName("IX_IntegrationId");
+
+                // Create an index for the FileName
+                entity.HasIndex(e => e.FileName).IsUnique(false).HasDatabaseName("IX_FileName");
             });
 
             // Configure the VaccinationData entity
@@ -96,6 +102,12 @@ namespace CDI.CovidDataManagement.API.Data
                 // Configure the FirstVaccineDate property
                 entity.Property(e => e.FirstVaccineDate)
                 .HasMaxLength(10);
+
+                // Create an index for the IntegrationId
+                entity.HasIndex(e => e.IntegrationId).IsUnique(false).HasDatabaseName("IX_IntegrationId");
+
+                // Create an index for the Country
+                entity.HasIndex(e => e.Country).IsUnique(false).HasDatabaseName("IX_Country");
             });
 
             // Configure the VaccinationMetaData entity
@@ -207,6 +219,12 @@ namespace CDI.CovidDataManagement.API.Data
                 // Configure the WhoRegion property
                 entity.Property(e => e.WhoRegion)
                 .HasMaxLength(25);
+
+                // Create an index for the IntegrationId
+                entity.HasIndex(e => e.IntegrationId).IsUnique(false).HasDatabaseName("IX_IntegrationId");
+
+                // Create an index for the Country
+                entity.HasIndex(e => e.Name).IsUnique(false).HasDatabaseName("IX_CountryName");
             });
 
             // Apply configurations from the current assembly
