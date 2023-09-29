@@ -1,4 +1,7 @@
-﻿// Basemap urls
+﻿// Url Endpoints
+var dataUrl = "https://localhost:7266/covid-geojson-data";
+
+// Basemap urls
 var baseOsmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
 });
@@ -30,3 +33,11 @@ var baseLayers = {
 
 // Add the layers control
 L.control.layers(baseLayers).addTo(map);
+
+$.getJSON(dataUrl, function (data) {
+    $.each(data, function (i, item) {
+        // Convert the coordinates value to a javascript array
+        var conv_poly = JSON.parse(item.geoJsonData.coordinates);
+        var poly = L.polygon(conv_poly).addTo(map);
+    });
+});
