@@ -4,6 +4,7 @@ using CDI.GeoSpatialDataLoader.API.Models;
 using CDI.WebAPI.Core.Utils;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace CDI.GeoSpatialDataLoader.API.Services
 {
@@ -131,7 +132,20 @@ namespace CDI.GeoSpatialDataLoader.API.Services
         {
             // Extract values from the Geo JSON feature
             var properties = feature["properties"];
-            var geometry = feature["geometry"]["coordinates"].ToString(Formatting.None);
+            var geometry = feature["geometry"]["coordinates"];
+
+            // Check if the geometry is a Polygon or MultiPolygon
+            if (feature["geometry"]["type"] == "Polygon")
+            {
+                ReversePolygonCoordinates(geometry);
+            }
+            else if (feature["geometry"]["type"] == "MultiPolygon")
+            {
+                foreach (var polygon in geometry)
+                {
+                    ReversePolygonCoordinates(polygon);
+                }
+            }
 
             return new GeoSpatialModel
             {
@@ -142,8 +156,25 @@ namespace CDI.GeoSpatialDataLoader.API.Services
                 NameLong = properties["NAME_LONG"],
                 FormalEN = properties["FORMAL_EN"],
                 NameEN = properties["NAME_EN"],
-                Coordinates = geometry
+                Coordinates = geometry.ToString(Formatting.None)
             };
+        }
+        private static void ReversePolygonCoordinates(dynamic coordinates)
+        {
+            // Check if coordinates is an array of arrays
+            if (coordinates is JArray)
+            {
+                for (int i = 0; i < coordinates.Count; i++)
+                {
+                    var ringPolygon = coordinates[i];
+                    for (int j = 0; j < ringPolygon.Count; j++)
+                    {
+                        var lonLatPair = ringPolygon[j];
+                        // Reverse lon, lat to lat, lon
+                        ringPolygon[j] = new JArray(lonLatPair[1], lonLatPair[0]);
+                    }
+                }
+            }
         }
     }
 }
