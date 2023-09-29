@@ -34,10 +34,40 @@ var baseLayers = {
 // Add the layers control
 L.control.layers(baseLayers).addTo(map);
 
+function getColor(d) {
+    var pallete = ['#ffc0b8', '#ff9e93', '#ff7b6f', '#ff594b', '#ff3626', '#ff1302', '#ff0000', '#99000d'];
+
+    var thresholds = [0, 1000, 10000, 50000, 100000, 250000, 500000, 700000];
+
+
+    return d >= thresholds[7] ? pallete[7] :
+        d > thresholds[6] ? pallete[6] :
+            d > thresholds[5] ? pallete[5] :
+                d > thresholds[4] ? pallete[4] :
+                    d > thresholds[3] ? pallete[3] :
+                        d > thresholds[2] ? pallete[2] :
+                            d > thresholds[1] ? pallete[1] :
+                                pallete[0];
+}
+
+function createPolygonStyle(item) {
+    return {
+        weight: 1,
+        opacity: 1,
+        color: 'grey',
+        dashArray: '',
+        fillOpacity: 0.9,
+        fillColor: getColor(item.covidData.cumulativeDeaths)
+    };
+}
+
 $.getJSON(dataUrl, function (data) {
+    // Iterate over each item in the 'data' array
     $.each(data, function (i, item) {
-        // Convert the coordinates value to a javascript array
+        // Parse the 'geoJsonData.coordinates' property from JSON to a JavaScript array
         var conv_poly = JSON.parse(item.geoJsonData.coordinates);
-        var poly = L.polygon(conv_poly).addTo(map);
+        // Create a polygon using Leaflet library
+        var poly = L.polygon(conv_poly, createPolygonStyle(item));
+        poly.addTo(map);
     });
 });
