@@ -61,6 +61,15 @@ function createPolygonStyle(item) {
     };
 }
 
+function createMouseoverPolygonStyle(item) {
+    return {
+        weight: 5,
+        color: 'yellow',
+        dashArray: '',
+        fillOpacity: 0.7
+    };
+}
+
 $.getJSON(dataUrl, function (data) {
     // Iterate over each item in the 'data' array
     $.each(data, function (i, item) {
@@ -68,6 +77,24 @@ $.getJSON(dataUrl, function (data) {
         var conv_poly = JSON.parse(item.geoJsonData.coordinates);
         // Create a polygon using Leaflet library
         var poly = L.polygon(conv_poly, createPolygonStyle(item));
+
+        poly.bindPopup(
+            "<div class='custom-leaflet-popup-title'>" + item.geoJsonData.nameEN.toString() + "</div>" +
+            "</br><div class='custom-leaflet-popup-subtitle1'>Confirmed Deaths and Cases:</div>" +
+            "<div class='custom-leaflet-popup-content'>- " + item.covidData.cumulativeDeaths.toLocaleString('en-US') + " Deaths </div>" +
+            "<div class='custom-leaflet-popup-content'>- " + item.covidData.cumulativeCases.toLocaleString('en-US') + " Cases</div>" +
+            "</br><div class='custom-leaflet-popup-subtitle2'>Vaccination:</div>" +
+            "<div class='custom-leaflet-popup-content'>- " + (typeof item.covidData.totalVaccineDoses === 'number' ? item.covidData.totalVaccineDoses.toLocaleString('en-US') : item.covidData.totalVaccineDoses) + " Vaccines</div>"
+        );
+        poly.on('mouseover', function (e) {
+            this.setStyle(createMouseoverPolygonStyle(item));
+            this.openPopup();
+        });
+        poly.on('mouseout', function (e) {
+            this.setStyle(createPolygonStyle(item));
+            this.closePopup();
+        });
+
         poly.addTo(map);
     });
 });

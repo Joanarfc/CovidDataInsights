@@ -13,3 +13,26 @@
     border-radius: 5px;
     color: whitesmoke;
 }
+
+.custom-leaflet-popup-title {
+    font-size: 22px;
+    font-weight: bold;
+    color: #99000d;
+}
+
+.custom-leaflet-popup-subtitle1 {
+    font-size: 17px;
+    font-weight: bold;
+    color: red;
+}
+
+.custom-leaflet-popup-subtitle2 {
+    font-size: 17px;
+    font-weight: bold;
+    color: green;
+}
+
+.custom-leaflet-popup-content {
+    font-size: 15px;
+    color: grey;
+}
