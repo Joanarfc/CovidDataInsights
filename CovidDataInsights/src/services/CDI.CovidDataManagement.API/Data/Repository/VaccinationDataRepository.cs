@@ -1,4 +1,5 @@
 ﻿#nullable disable
+using CDI.CovidDataManagement.API.DTO;
 using CDI.CovidDataManagement.API.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -8,11 +9,9 @@ namespace CDI.CovidDataManagement.API.Data.Repository
     {
         Task AddVaccinationDataRangeAsync(IEnumerable<VaccinationDataModel> vaccinationDataList);
         Task<List<VaccinationDataModel>> GetAllAsync();
-        Task<List<string>> GetAllCountriesAsync();
+        Task<List<VaccinationDataDto>> GetAllVaccinationDataByMaxIntegrationIdAsync(string filename);
+        Task<VaccinationDataDto> GetVaccinationDataByMaxIntegrationIdAndCountryAsync(string filename, string country = null);
         Task<int> GetTotalCountAsync();
-        Task<long?> GetVaccineDosesByCountryAsync(string filename, string country = null);
-        Task<long?> GetPersonsVaccinatedAtLeastOneDoseByCountryAsync(string filename, string country = null);
-        Task<long?> GetPersonsVaccinatedWithCompletePrimarySeriesByCountryAsync(string filename, string country = null);
     }
     public class VaccinationDataRepository : Repository<VaccinationDataModel>, IVaccinationDataRepository
     {
@@ -28,14 +27,6 @@ namespace CDI.CovidDataManagement.API.Data.Repository
         {
             return await (_context.VaccinationData?.AsNoTracking().ToListAsync() ?? Task.FromResult(new List<VaccinationDataModel>()));
         }
-        public async Task<List<string>> GetAllCountriesAsync()
-        {
-            var countries = await _context.VaccinationData
-                .Select(c => c.Country)
-                .ToListAsync();
-
-            return countries;
-        }
 
         public async Task<int> GetTotalCountAsync()
         {
@@ -43,25 +34,24 @@ namespace CDI.CovidDataManagement.API.Data.Repository
 
             return totalCount;
         }
-
-        public async Task<long?> GetVaccineDosesByCountryAsync(string filename, string country = null)
+        public async Task<List<VaccinationDataDto>> GetAllVaccinationDataByMaxIntegrationIdAsync(string filename)
         {
             var maxIntegrationId = await GetMaxIntegrationIdAsync(filename);
 
-            var query = _context.VaccinationData
-                        .Where(vd => vd.IntegrationId == maxIntegrationId.Value);
+            var query = from vd in _context.VaccinationData
+                        where vd.IntegrationId == maxIntegrationId.Value
+                        select new VaccinationDataDto
+                        {
+                            Region = vd.Country,
+                            TotalVaccineDoses = vd.TotalVaccinations,
+                            PersonsVaccinatedAtLeastOneDose = vd.PersonsVaccinated_1Plus_Dose,
+                            PersonsVaccinatedWithCompletePrimarySeries = vd.PersonsLastDose
+                        };
 
-            if (!string.IsNullOrEmpty(country))
-            {
-                query = query.Where(vd => vd.Country == country);
-            }
-
-            var totalVaccineDoses = await query.SumAsync(vd => vd.TotalVaccinations);
-
-            return totalVaccineDoses;
+            return await query.ToListAsync();
         }
 
-        public async Task<long?> GetPersonsVaccinatedAtLeastOneDoseByCountryAsync(string filename, string country = null)
+        public async Task<VaccinationDataDto> GetVaccinationDataByMaxIntegrationIdAndCountryAsync(string filename, string country = null)
         {
             var maxIntegrationId = await GetMaxIntegrationIdAsync(filename);
 
@@ -73,25 +63,17 @@ namespace CDI.CovidDataManagement.API.Data.Repository
                 query = query.Where(vd => vd.Country == country);
             }
 
-            var totalPersonsVaccinatedAtLeastOneDose = await query.SumAsync(vd => vd.PersonsVaccinated_1Plus_Dose);
+            var vaccinationData = await query
+                .Select(vd => new VaccinationDataDto
+                {
+                    Region = vd.Country,
+                    TotalVaccineDoses = vd.TotalVaccinations,
+                    PersonsVaccinatedAtLeastOneDose = vd.PersonsVaccinated_1Plus_Dose,
+                    PersonsVaccinatedWithCompletePrimarySeries = vd.PersonsLastDose
+                })
+                .FirstOrDefaultAsync();
 
-            return totalPersonsVaccinatedAtLeastOneDose;
-        }
-        public async Task<long?> GetPersonsVaccinatedWithCompletePrimarySeriesByCountryAsync(string filename, string country = null)
-        {
-            var maxIntegrationId = await GetMaxIntegrationIdAsync(filename);
-
-            var query = _context.VaccinationData
-                        .Where(vd => vd.IntegrationId == maxIntegrationId.Value);
-
-            if (!string.IsNullOrEmpty(country))
-            {
-                query = query.Where(vd => vd.Country == country);
-            }
-
-            var totalPersonsVaccinatedWithCompletePrimarySeries = await query.SumAsync(vd => vd.PersonsLastDose);
-
-            return totalPersonsVaccinatedWithCompletePrimarySeries;
+            return vaccinationData;
         }
     }
 }

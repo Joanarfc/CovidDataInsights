@@ -10,8 +10,8 @@ namespace CDI.CovidDataManagement.API.Services
     public interface IWhoGlobalTableDataService
     {
         Task IntegrateWhoGlobalTableDataAsync();
-        Task<CovidDataDto> GetTotalCasesDataByCountryAsync(string? country = null);
-        Task<CovidDataDto> GetTotalDeathsDataByCountryAsync(string? country = null);
+        Task<IEnumerable<CasesAndDeathsDataDto>> GetAllCasesAndDeathsDataAsync();
+        Task<CasesAndDeathsDataDto> GetTotalCasesAndDeathsDataByCountryAsync(string? country = null);
     }
     public class WhoGlobalTableDataService : IWhoGlobalTableDataService
     {
@@ -55,7 +55,7 @@ namespace CDI.CovidDataManagement.API.Services
 
             await _whoGlobalTableDataRepository.AddWhoGlobalTableDataRangeAsync(whoGlobalTableData);
         }
-        public async Task<CovidDataDto> GetTotalCasesDataByCountryAsync(string? country = null)
+        public async Task<IEnumerable<CasesAndDeathsDataDto>> GetAllCasesAndDeathsDataAsync()
         {
             var csvUrl = GetCsvUrl();
 
@@ -63,19 +63,10 @@ namespace CDI.CovidDataManagement.API.Services
 
             _csvFileHelper.ValidateCsvFilename(csvFilename);
 
-            var totalNewCasesLast7Days = await _whoGlobalTableDataRepository.GetNewCasesLast7DaysByCountryAsync(csvFilename, country);
-            var totalCumulativeCases = await _whoGlobalTableDataRepository.GetCumulativeCasesByCountryAsync(csvFilename, country);
-
-            var region = string.IsNullOrWhiteSpace(country) ? "Global" : country;
-
-            return new CovidDataDto
-            {
-                Region = region,
-                NewCasesLast7Days = totalNewCasesLast7Days,
-                CumulativeCases = totalCumulativeCases
-            };
+            var whoGlobalTableData = await _whoGlobalTableDataRepository.GetAllCasesAndDeathsDataByMaxIntegrationIdAsync(csvFilename);
+            return whoGlobalTableData;
         }
-        public async Task<CovidDataDto> GetTotalDeathsDataByCountryAsync(string? country = null)
+        public async Task<CasesAndDeathsDataDto> GetTotalCasesAndDeathsDataByCountryAsync(string? country = null)
         {
             var csvUrl = GetCsvUrl();
 
@@ -83,16 +74,15 @@ namespace CDI.CovidDataManagement.API.Services
 
             _csvFileHelper.ValidateCsvFilename(csvFilename);
 
-            var totalNewDeathsLast7Days = await _whoGlobalTableDataRepository.GetNewDeathsLast7DaysByCountryAsync(csvFilename, country);
-            var totalCumulativeDeaths = await _whoGlobalTableDataRepository.GetCumulativeDeathsByCountryAsync(csvFilename, country);
+            var casesAndDeathsDataCountry = await _whoGlobalTableDataRepository.GetCasesAndDeathsDataByMaxIntegrationIdAndCountryAsync(csvFilename, country);
 
-            var region = string.IsNullOrWhiteSpace(country) ? "Global" : country;
-
-            return new CovidDataDto
+            return new CasesAndDeathsDataDto
             {
-                Region = region,
-                NewDeathsLast7Days = totalNewDeathsLast7Days,
-                CumulativeDeaths = totalCumulativeDeaths
+                Region = casesAndDeathsDataCountry.Region,
+                NewCasesLast7Days = casesAndDeathsDataCountry.NewCasesLast7Days,
+                CumulativeCases = casesAndDeathsDataCountry.CumulativeCases,
+                NewDeathsLast7Days = casesAndDeathsDataCountry.NewDeathsLast7Days,
+                CumulativeDeaths = casesAndDeathsDataCountry.CumulativeDeaths
             };
         }
 
