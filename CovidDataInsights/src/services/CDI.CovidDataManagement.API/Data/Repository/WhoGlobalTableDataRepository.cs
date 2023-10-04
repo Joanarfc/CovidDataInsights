@@ -1,4 +1,5 @@
 ﻿#nullable disable
+using CDI.CovidDataManagement.API.DTO;
 using CDI.CovidDataManagement.API.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,10 +10,8 @@ namespace CDI.CovidDataManagement.API.Data.Repository
         Task AddWhoGlobalTableDataRangeAsync(IEnumerable<WhoGlobalTableDataModel> whoGlobalTableDataList);
         Task<List<WhoGlobalTableDataModel>> GetAllAsync();
         Task<int> GetTotalCountAsync();
-        Task<int?> GetNewCasesLast7DaysByCountryAsync(string filename, string country = null);
-        Task<long?> GetCumulativeCasesByCountryAsync(string filename, string country);
-        Task<int?> GetNewDeathsLast7DaysByCountryAsync(string filename, string country = null);
-        Task<long?> GetCumulativeDeathsByCountryAsync(string filename, string country);
+        Task<IEnumerable<CasesAndDeathsDataDto>> GetAllCasesAndDeathsDataByMaxIntegrationIdAsync(string filename);
+        Task<CasesAndDeathsDataDto> GetCasesAndDeathsDataByMaxIntegrationIdAndCountryAsync(string filename, string country = null);
     }
     public class WhoGlobalTableDataRepository : Repository<WhoGlobalTableDataModel>, IWhoGlobalTableDataRepository
     {
@@ -26,7 +25,7 @@ namespace CDI.CovidDataManagement.API.Data.Repository
 
         public async Task<List<WhoGlobalTableDataModel>> GetAllAsync()
         {
-            return await(_context.WhoGlobalTableData?.AsNoTracking().ToListAsync() ?? Task.FromResult(new List<WhoGlobalTableDataModel>()));
+            return await (_context.WhoGlobalTableData?.AsNoTracking().ToListAsync() ?? Task.FromResult(new List<WhoGlobalTableDataModel>()));
         }
         public async Task<int> GetTotalCountAsync()
         {
@@ -34,87 +33,48 @@ namespace CDI.CovidDataManagement.API.Data.Repository
 
             return totalCount;
         }
-        
-        public async Task<int?> GetNewCasesLast7DaysByCountryAsync(string filename, string country = null)
+        public async Task<IEnumerable<CasesAndDeathsDataDto>> GetAllCasesAndDeathsDataByMaxIntegrationIdAsync(string filename)
         {
             var maxIntegrationId = await GetMaxIntegrationIdAsync(filename);
 
-            var query = _context.WhoGlobalTableData
-                .Where(vd => vd.IntegrationId == maxIntegrationId.Value);
+            var query = from cd in _context.WhoGlobalTableData
+                        where cd.IntegrationId == maxIntegrationId.Value && cd.Name != "Global"
+                        select new CasesAndDeathsDataDto
+                        {
+                            Region = cd.Name,
+                            NewCasesLast7Days = cd.CasesNewlyReportedInLast7Days,
+                            CumulativeCases = cd.CasesCumulativeTotal,
+                            NewDeathsLast7Days = cd.DeathsNewlyReportedInLast7Days,
+                            CumulativeDeaths = cd.DeathsCumulativeTotal
+                        };
 
-            if (!string.IsNullOrEmpty(country))
-            {
-                query = query.Where(wtd => wtd.Name == country);
-            }
-            else
-            {
-                query = query.Where(wtd => wtd.Name == "Global");
-            }
-
-            var newCasesLast7Days = await query.SumAsync(wtd => wtd.CasesNewlyReportedInLast7Days);
-
-            return newCasesLast7Days;
+            return await query.ToListAsync();
         }
 
-        public async Task<long?> GetCumulativeCasesByCountryAsync(string filename, string country)
+        public async Task<CasesAndDeathsDataDto> GetCasesAndDeathsDataByMaxIntegrationIdAndCountryAsync(string filename, string country = null)
         {
             var maxIntegrationId = await GetMaxIntegrationIdAsync(filename);
 
             var query = _context.WhoGlobalTableData
-                .Where(vd => vd.IntegrationId == maxIntegrationId.Value);
+                        .Where(cd => cd.IntegrationId == maxIntegrationId.Value && cd.Name != "Global");
 
             if (!string.IsNullOrEmpty(country))
             {
-                query = query.Where(wtd => wtd.Name == country);
-            }
-            else
-            {
-                query = query.Where(wtd => wtd.Name == "Global");
+                query = query.Where(cd => cd.Name == country);
             }
 
-            var newCasesLast7Days = await query.SumAsync(wtd => wtd.CasesCumulativeTotal);
+            var casesAndDeathsData = await query
+                .Select(cd => new CasesAndDeathsDataDto
+                {
+                    Region = cd.Name,
+                    NewCasesLast7Days = cd.CasesNewlyReportedInLast7Days,
+                    CumulativeCases = cd.CasesCumulativeTotal,
+                    NewDeathsLast7Days = cd.DeathsNewlyReportedInLast7Days,
+                    CumulativeDeaths = cd.DeathsCumulativeTotal
+                })
+                .FirstOrDefaultAsync();
 
-            return newCasesLast7Days;
-        }
-        public async Task<int?> GetNewDeathsLast7DaysByCountryAsync(string filename, string country = null)
-        {
-            var maxIntegrationId = await GetMaxIntegrationIdAsync(filename);
-
-            var query = _context.WhoGlobalTableData
-                .Where(vd => vd.IntegrationId == maxIntegrationId.Value);
-
-            if (!string.IsNullOrEmpty(country))
-            {
-                query = query.Where(wtd => wtd.Name == country);
-            }
-            else
-            {
-                query = query.Where(wtd => wtd.Name == "Global");
-            }
-
-            var newCasesLast7Days = await query.SumAsync(wtd => wtd.DeathsNewlyReportedInLast7Days);
-
-            return newCasesLast7Days;
-        }
-        public async Task<long?> GetCumulativeDeathsByCountryAsync(string filename, string country)
-        {
-            var maxIntegrationId = await GetMaxIntegrationIdAsync(filename);
-
-            var query = _context.WhoGlobalTableData
-                .Where(vd => vd.IntegrationId == maxIntegrationId.Value);
-
-            if (!string.IsNullOrEmpty(country))
-            {
-                query = query.Where(wtd => wtd.Name == country);
-            }
-            else
-            {
-                query = query.Where(wtd => wtd.Name == "Global");
-            }
-
-            var newCasesLast7Days = await query.SumAsync(wtd => wtd.DeathsCumulativeTotal);
-
-            return newCasesLast7Days;
+            return casesAndDeathsData;
         }
     }
 }

@@ -10,8 +10,8 @@ namespace CDI.CovidDataManagement.API.Services
     public interface IVaccinationDataService
     {
         Task IntegrateVaccinationDataAsync();
-        Task<CovidDataDto> GetVaccinationDataByCountryAsync(string? country = null);
-        Task<List<string>> GetAllCountriesAsync();
+        Task<IEnumerable<VaccinationDataDto>> GetAllVaccinationDataAsync();
+        Task<VaccinationDataDto> GetVaccinationDataByCountryAsync(string? country = null);
     }
     public class VaccinationDataService : IVaccinationDataService
     {
@@ -53,7 +53,7 @@ namespace CDI.CovidDataManagement.API.Services
 
             await _vaccinationDataRepository.AddVaccinationDataRangeAsync(vaccinationData);
         }
-        public async Task<CovidDataDto> GetVaccinationDataByCountryAsync(string? country = null)
+        public async Task<IEnumerable<VaccinationDataDto>> GetAllVaccinationDataAsync()
         {
             var csvUrl = GetCsvUrl();
 
@@ -61,25 +61,27 @@ namespace CDI.CovidDataManagement.API.Services
 
             _csvFileHelper.ValidateCsvFilename(csvFilename);
 
-            var totalVaccineDoses = await _vaccinationDataRepository.GetVaccineDosesByCountryAsync(csvFilename, country);
-            var totalPersonsVaccinatedAtLeastOneDose = await _vaccinationDataRepository.GetPersonsVaccinatedAtLeastOneDoseByCountryAsync(csvFilename, country);
-            var totalPersonsVaccinatedWithCompletePrimarySeries = await _vaccinationDataRepository.GetPersonsVaccinatedWithCompletePrimarySeriesByCountryAsync(csvFilename, country);
-
-            var region = string.IsNullOrWhiteSpace(country) ? "Global" : country;
-
-            return new CovidDataDto
-            {
-                Region = region,
-                TotalVaccineDoses = totalVaccineDoses,
-                TotalPersonsVaccinatedAtLeastOneDose = totalPersonsVaccinatedAtLeastOneDose,
-                TotalPersonsVaccinatedWithCompletePrimarySeries = totalPersonsVaccinatedWithCompletePrimarySeries
-            };
+            var vaccinationData = await _vaccinationDataRepository.GetAllVaccinationDataByMaxIntegrationIdAsync(csvFilename);
+            return vaccinationData;
         }
-        public async Task<List<string>> GetAllCountriesAsync()
-        {
-            var countries = await _vaccinationDataRepository.GetAllCountriesAsync();
 
-            return countries;
+        public async Task<VaccinationDataDto> GetVaccinationDataByCountryAsync(string? country)
+        {
+            var csvUrl = GetCsvUrl();
+
+            var csvFilename = _csvFileHelper.ExtractFilename(csvUrl);
+
+            _csvFileHelper.ValidateCsvFilename(csvFilename);
+
+            var vaccinationDataCountry = await _vaccinationDataRepository.GetVaccinationDataByMaxIntegrationIdAndCountryAsync(csvFilename, country);
+
+            return new VaccinationDataDto
+            {
+                Region = vaccinationDataCountry.Region,
+                TotalVaccineDoses = vaccinationDataCountry.TotalVaccineDoses,
+                PersonsVaccinatedAtLeastOneDose = vaccinationDataCountry.PersonsVaccinatedAtLeastOneDose,
+                PersonsVaccinatedWithCompletePrimarySeries = vaccinationDataCountry.PersonsVaccinatedWithCompletePrimarySeries
+            };
         }
 
         private string GetCsvUrl()

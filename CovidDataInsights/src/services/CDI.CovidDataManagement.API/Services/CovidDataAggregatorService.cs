@@ -32,40 +32,89 @@ namespace CDI.CovidDataManagement.API.Services
             await _whoGlobalDataService.IntegrateWhoGlobalDataAsync();
             await _whoGlobalTableDataService.IntegrateWhoGlobalTableDataAsync();
         }
+
         public async Task<IEnumerable<CovidDataDto>> GetAllCovidDataAsync()
         {
-            var countries = await _vaccinationDataService.GetAllCountriesAsync();
-            var covidDataList = new List<CovidDataDto>();
+            var vaccinationData = await _vaccinationDataService.GetAllVaccinationDataAsync();
+            var casesAndDeathsData = await _whoGlobalTableDataService.GetAllCasesAndDeathsDataAsync();
 
-            foreach (var country in countries)
-            {
-                var covidData = await GenerateCovidDataDtoAsync(country);
-                covidDataList.Add(covidData);
-            }
+            var covidData = MergeCovidData(vaccinationData, casesAndDeathsData);
 
-            return covidDataList;
+            return covidData;
         }
 
         public async Task<CovidDataDto> GetCovidDataByCountryAsync(string? country = null)
         {
-            return await GenerateCovidDataDtoAsync(country);
-        }
-        private async Task<CovidDataDto> GenerateCovidDataDtoAsync(string? country)
-        {
-            var vaccinationData = await _vaccinationDataService.GetVaccinationDataByCountryAsync(country);
-            var casesData = await _whoGlobalTableDataService.GetTotalCasesDataByCountryAsync(country);
-            var deathsData = await _whoGlobalTableDataService.GetTotalDeathsDataByCountryAsync(country);
+            string region = string.IsNullOrEmpty(country) ? "Global" : country;
 
+            if (string.IsNullOrEmpty(country))
+            {
+                var globalVaccinationData = await _vaccinationDataService.GetAllVaccinationDataAsync();
+                var globalCasesAndDeathsData = await _whoGlobalTableDataService.GetAllCasesAndDeathsDataAsync();
+
+                var globalCovidData = MergeCovidData(globalVaccinationData, globalCasesAndDeathsData, region);
+
+                return globalCovidData.Single();
+            }
+
+            var vaccinationData = await _vaccinationDataService.GetVaccinationDataByCountryAsync(country);
+            var casesAndDeathsData = await _whoGlobalTableDataService.GetTotalCasesAndDeathsDataByCountryAsync(country);
+
+            var covidData = GenerateCovidDataDto(vaccinationData, casesAndDeathsData);
+
+            return covidData;
+        }
+
+        private static IEnumerable<CovidDataDto> MergeCovidData(IEnumerable<VaccinationDataDto> vaccinationData,
+                                                         IEnumerable<CasesAndDeathsDataDto> casesAndDeathsData,
+                                                         string? country = null)
+        {
+            if (string.IsNullOrEmpty(country))
+            {
+                // Merge the data using "Region"
+                return from vcData in vaccinationData
+                       join cdData in casesAndDeathsData on vcData.Region equals cdData.Region
+                       select new CovidDataDto
+                       {
+                           Region = vcData.Region,
+                           TotalVaccineDoses = vcData.TotalVaccineDoses,
+                           TotalPersonsVaccinatedAtLeastOneDose = vcData.PersonsVaccinatedAtLeastOneDose,
+                           TotalPersonsVaccinatedWithCompletePrimarySeries = vcData.PersonsVaccinatedWithCompletePrimarySeries,
+                           NewCasesLast7Days = cdData.NewCasesLast7Days,
+                           CumulativeCases = cdData.CumulativeCases,
+                           NewDeathsLast7Days = cdData.NewDeathsLast7Days,
+                           CumulativeDeaths = cdData.CumulativeDeaths
+                       };
+            }
+            else
+            {
+                var globalCovidData = new CovidDataDto
+                {
+                    Region = country,
+                    TotalVaccineDoses = vaccinationData.Sum(vcData => vcData.TotalVaccineDoses),
+                    TotalPersonsVaccinatedAtLeastOneDose = vaccinationData.Sum(vcData => vcData.PersonsVaccinatedAtLeastOneDose),
+                    TotalPersonsVaccinatedWithCompletePrimarySeries = vaccinationData.Sum(vcData => vcData.PersonsVaccinatedWithCompletePrimarySeries),
+                    NewCasesLast7Days = casesAndDeathsData.Sum(cdData => cdData.NewCasesLast7Days),
+                    CumulativeCases = casesAndDeathsData.Sum(cdData => cdData.CumulativeCases),
+                    NewDeathsLast7Days = casesAndDeathsData.Sum(cdData => cdData.NewDeathsLast7Days),
+                    CumulativeDeaths = casesAndDeathsData.Sum(cdData => cdData.CumulativeDeaths)
+                };
+
+                return new List<CovidDataDto> { globalCovidData };
+            }
+        }
+        private static CovidDataDto GenerateCovidDataDto(VaccinationDataDto vaccinationData, CasesAndDeathsDataDto casesAndDeathsData)
+        {
             return new CovidDataDto
             {
-                Region = casesData.Region,
+                Region = vaccinationData.Region,
                 TotalVaccineDoses = vaccinationData.TotalVaccineDoses,
-                TotalPersonsVaccinatedAtLeastOneDose = vaccinationData.TotalPersonsVaccinatedAtLeastOneDose,
-                TotalPersonsVaccinatedWithCompletePrimarySeries = vaccinationData.TotalPersonsVaccinatedWithCompletePrimarySeries,
-                NewCasesLast7Days = casesData.NewCasesLast7Days,
-                CumulativeCases = casesData.CumulativeCases,
-                NewDeathsLast7Days = deathsData.NewDeathsLast7Days,
-                CumulativeDeaths = deathsData.CumulativeDeaths
+                TotalPersonsVaccinatedAtLeastOneDose = vaccinationData.PersonsVaccinatedAtLeastOneDose,
+                TotalPersonsVaccinatedWithCompletePrimarySeries = vaccinationData.PersonsVaccinatedWithCompletePrimarySeries,
+                NewCasesLast7Days = casesAndDeathsData.NewCasesLast7Days,
+                CumulativeCases = casesAndDeathsData.CumulativeCases,
+                NewDeathsLast7Days = casesAndDeathsData.NewDeathsLast7Days,
+                CumulativeDeaths = casesAndDeathsData.CumulativeDeaths
             };
         }
     }
