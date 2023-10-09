@@ -1,5 +1,7 @@
 #map {
     height: calc(100vh - 0px);
+    position: relative;
+    z-index: 1;
 }
 
 .leaflet-control-layers {
@@ -35,4 +37,33 @@
 .custom-leaflet-popup-content {
     font-size: 15px;
     color: grey;
+}
+
+.legend {
+    padding: 6px 10px;
+    width: 200px;
+    font: 14px/16px Arial, Helvetica, sans-serif;
+    background: rgba(0,0,0,0.85);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+    color: whitesmoke;
+    z-index: 1005;
+}
+
+#legendTitle {
+    text-align: center;
+    margin-bottom: 15px;
+    color: whitesmoke;
+    font-weight: bold;
+}
+
+.legend-color {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 5px;
+}
+
+.legend-label {
+    font-size: 14px;
 }
