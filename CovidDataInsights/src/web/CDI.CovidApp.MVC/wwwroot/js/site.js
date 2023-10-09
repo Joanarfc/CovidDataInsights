@@ -1,6 +1,9 @@
 ﻿// Url Endpoints
 var dataUrl = "https://localhost:7266/covid-geojson-data";
 
+// Thresholds array definition
+var thresholds = [0, 1000, 10000, 50000, 100000, 250000, 500000, 700000];
+
 // Basemap urls
 var baseOsmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -36,9 +39,6 @@ L.control.layers(baseLayers).addTo(map);
 
 function getColor(d) {
     var pallete = ['#ffc0b8', '#ff9e93', '#ff7b6f', '#ff594b', '#ff3626', '#ff1302', '#ff0000', '#99000d'];
-
-    var thresholds = [0, 1000, 10000, 50000, 100000, 250000, 500000, 700000];
-
 
     return d >= thresholds[7] ? pallete[7] :
         d > thresholds[6] ? pallete[6] :
@@ -98,3 +98,32 @@ $.getJSON(dataUrl, function (data) {
         poly.addTo(map);
     });
 });
+
+// Create the Legend
+createLegend();
+function createLegend() {
+    var legend = L.control({ position: 'bottomright' });
+    legend.onAdd = function (map) {
+        var legendContainer = L.DomUtil.create('div', 'legend');
+        var labels = [];
+        var from, to;
+
+        $(legendContainer).append("<h5 id='legendTitle'>COVID CASES LEGEND</h5>");
+
+        // Generate a label with a coloured square
+        for (var i = 0; i < thresholds.length; i++) {
+            from = thresholds[i];
+            to = thresholds[i + 1];
+
+            labels.push(
+                '<span class="legend-color" style="background:' + getColor(from + 1) + '"></span> ' +
+                '<span class="legend-label">' + from + (to ? '&ndash;' + to : '+') + '</span>');
+        }
+
+        $(legendContainer).append(labels.join('<br>'));
+
+        return legendContainer;
+    };
+
+    legend.addTo(map);
+}
