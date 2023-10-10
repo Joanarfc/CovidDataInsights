@@ -67,3 +67,57 @@
 .legend-label {
     font-size: 14px;
 }
+
+/* Style for the Leaflet control container */
+.leaflet-control-dropdown {
+    background-color: rgba(255, 255, 255, 0.7);
+    padding: 5px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    background-color: #C8C8C8;
+}
+
+/* Style for the region title */
+.leaflet-control-title {
+    margin-bottom: 5px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #99000d;
+}
+
+/* Style for the dropdowns */
+.leaflet-control-dropdown select {
+    width: 100%;
+    padding: 4px;
+    border: 1px solid #ff1302;
+    border-radius: 3px;
+    background-color: #f8f8f8;
+    font-size: 12px;
+    color: #333;
+}
+
+    .leaflet-control-dropdown select option:checked {
+        background-color: #ffc0b8;
+    }
+
+/* Style for the selected data */
+.leaflet-control #filteredData {
+    margin-top: 10px;
+    font-size: 14px;
+    color: #333;
+    text-align: right;
+}
+
+.metric-number {
+    font-weight: bold;
+    text-align: right;
+}
+
+.metric-label {
+    font-weight: normal;
+    font-size: 12px;
+    margin-top: 5px;
+    color: black;
+}
