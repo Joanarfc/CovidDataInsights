@@ -1,8 +1,12 @@
 ﻿// Url Endpoints
 var dataUrl = "https://localhost:7266/covid-geojson-data";
+var dataCountryUrl = "https://localhost:7266/covid-data/by-country";
 
 // Thresholds array definition
 var thresholds = [0, 1000, 10000, 50000, 100000, 250000, 500000, 700000];
+
+// Global variable to store the selected country
+var selectedCountry = null;
 
 // Basemap urls
 var baseOsmLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -37,6 +41,12 @@ var baseLayers = {
 // Add the layers control
 L.control.layers(baseLayers).addTo(map);
 
+// Add event listener to the map container to prevent dropdown from closing
+var mapContainer = document.getElementById('map');
+mapContainer.addEventListener('click', function (e) {
+    e.stopPropagation();
+});
+
 function getColor(d) {
     var pallete = ['#ffc0b8', '#ff9e93', '#ff7b6f', '#ff594b', '#ff3626', '#ff1302', '#ff0000', '#99000d'];
 
@@ -70,6 +80,11 @@ function createMouseoverPolygonStyle(item) {
     };
 }
 
+// Function to format numbers
+function formatNumber(number) {
+    return number.toLocaleString('en-US');
+}
+
 $.getJSON(dataUrl, function (data) {
     // Iterate over each item in the 'data' array
     $.each(data, function (i, item) {
@@ -81,10 +96,10 @@ $.getJSON(dataUrl, function (data) {
         poly.bindPopup(
             "<div class='custom-leaflet-popup-title'>" + item.geoJsonData.nameEN.toString() + "</div>" +
             "</br><div class='custom-leaflet-popup-subtitle1'>Confirmed Deaths and Cases:</div>" +
-            "<div class='custom-leaflet-popup-content'>- " + item.covidData.cumulativeDeaths.toLocaleString('en-US') + " Deaths </div>" +
-            "<div class='custom-leaflet-popup-content'>- " + item.covidData.cumulativeCases.toLocaleString('en-US') + " Cases</div>" +
+            "<div class='custom-leaflet-popup-content'>- " + formatNumber(item.covidData.cumulativeDeaths) + " Deaths </div>" +
+            "<div class='custom-leaflet-popup-content'>- " + formatNumber(item.covidData.cumulativeCases) + " Cases</div>" +
             "</br><div class='custom-leaflet-popup-subtitle2'>Vaccination:</div>" +
-            "<div class='custom-leaflet-popup-content'>- " + (typeof item.covidData.totalVaccineDoses === 'number' ? item.covidData.totalVaccineDoses.toLocaleString('en-US') : item.covidData.totalVaccineDoses) + " Vaccines</div>"
+            "<div class='custom-leaflet-popup-content'>- " + (typeof item.covidData.totalVaccineDoses === 'number' ? formatNumber(item.covidData.totalVaccineDoses) : item.covidData.totalVaccineDoses) + " Vaccines</div>"
         );
         poly.on('mouseover', function (e) {
             this.setStyle(createMouseoverPolygonStyle(item));
@@ -93,6 +108,10 @@ $.getJSON(dataUrl, function (data) {
         poly.on('mouseout', function (e) {
             this.setStyle(createPolygonStyle(item));
             this.closePopup();
+        });
+        poly.on('click', function (e) {
+            selectedCountry = item.geoJsonData.nameEN;
+            updateFilterData();
         });
 
         poly.addTo(map);
@@ -127,3 +146,100 @@ function createLegend() {
 
     legend.addTo(map);
 }
+
+// Create and add data selection control
+var dataSelectionControl = L.control({ position: 'bottomleft' });
+
+dataSelectionControl.onAdd = function (map) {
+    var container = L.DomUtil.create('div', 'leaflet-control-dropdown');
+
+    container.innerHTML = `
+        <label for="metricSelect">Select Metric:</label>
+        <select id="metricSelect">
+            <option value="Cases">Cases</option>
+            <option value="Vaccination">Vaccination</option>
+            <option value="Deaths">Deaths</option>
+        </select>
+
+        </br>
+        </br>
+
+        <div id="selectedRegion" class="leaflet-control-title"></div>
+        <div id="filteredData" class="leaflet-control"></div>
+    `;
+
+    L.DomEvent.disableClickPropagation(container);
+
+    return container;
+};
+
+dataSelectionControl.addTo(map);
+
+// Get the metric select element
+var metricSelect = document.getElementById('metricSelect');
+
+// Function to update filtered data
+function updateFilterData() {
+    var selectedMetric = metricSelect.value;
+    var apiUrl = dataCountryUrl + (selectedCountry ? "?country=" + encodeURIComponent(selectedCountry) : "");
+
+    var metricInfo = {
+        Cases: {
+            label: "Cumulative Cases",
+            property: "cumulativeCases",
+        },
+        Vaccination: {
+            label: "Total Vaccines",
+            property: "totalVaccineDoses",
+        },
+        Deaths: {
+            label: "Cumulative Deaths",
+            property: "cumulativeDeaths",
+        },
+    };
+
+    $.get(apiUrl, function (data) {
+        var filteredDataDiv = document.getElementById('filteredData');
+        var selectedRegionDiv = document.getElementById('selectedRegion');
+
+        if (data) {
+            selectedRegionDiv.textContent = "Region: " + (selectedCountry || "Global");
+
+            var metricData = metricInfo[selectedMetric];
+            var numberHTML = `<div class="metric-number">${formatNumber(data[metricData.property])}</div>`;
+            var labelHTML = `<div class="metric-label">${metricData.label}</div></br>`;
+            var filteredData = numberHTML + labelHTML;
+
+            if (selectedMetric === "Cases") {
+                var newCasesHTML = `<div class="metric-number">${formatNumber(data.newCasesLast7Days)}</div>`;
+                var newCasesLabelHTML = "<div class='metric-label'> New cases in the last 7 days</div>";
+                filteredData += newCasesHTML + newCasesLabelHTML;
+            } else if (selectedMetric === "Vaccination") {
+                var vaccinatedAtLeastOneDoseHTML = `<div class="metric-number">${formatNumber(data.totalPersonsVaccinatedAtLeastOneDose)}</div>`;
+                var vaccinatedAtLeastOneDoseLabelHTML = "<div class='metric-label'> Total Vaccinated With At Least 1 Dose</div></br>";
+                var completePrimarySeriesHTML = `<div class="metric-number">${formatNumber(data.totalPersonsVaccinatedWithCompletePrimarySeries)}</div>`;
+                var completePrimarySeriesLabelHTML = "<div class='metric-label'> Total Vaccinated With Complete Primary Series</div>";
+
+                filteredData += vaccinatedAtLeastOneDoseHTML + vaccinatedAtLeastOneDoseLabelHTML;
+                filteredData += completePrimarySeriesHTML + completePrimarySeriesLabelHTML;
+            } else if (selectedMetric === "Deaths") {
+                var newDeathsHTML = `<div class="metric-number">${formatNumber(data.newDeathsLast7Days)}</div>`;
+                var newDeathsLabelHTML = "<div class='metric-label'> New deaths in the last 7 days</div>";
+                filteredData += newDeathsHTML + newDeathsLabelHTML;
+            }
+
+            filteredDataDiv.innerHTML = filteredData;
+        } else {
+            filteredDataDiv.textContent = "Error fetching data.";
+        }
+    }).fail(function () {
+        var filteredDataDiv = document.getElementById('filteredData');
+        filteredDataDiv.textContent = "Error fetching data.";
+    });
+}
+
+// Add change event listener to metric select
+metricSelect.addEventListener('change', updateFilterData);
+
+// Initial call to provide global filtered data
+updateFilterData();
