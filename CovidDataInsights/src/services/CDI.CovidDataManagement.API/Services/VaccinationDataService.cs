@@ -1,4 +1,5 @@
-﻿using CDI.CovidDataManagement.API.Data.Repository;
+﻿using CDI.Core.DomainObjects;
+using CDI.CovidDataManagement.API.Data.Repository;
 using CDI.CovidDataManagement.API.DTO;
 using CDI.CovidDataManagement.API.Extensions;
 using CDI.CovidDataManagement.API.Factories;
@@ -20,18 +21,28 @@ namespace CDI.CovidDataManagement.API.Services
         private readonly IVaccinationDataRepository _vaccinationDataRepository;
         private readonly IFileIntegrationRepository _integrationRepository;
         private readonly CsvFileHelper _csvFileHelper;
+        private readonly CountryNameMapper _countryNameMapper;
 
         public VaccinationDataService(IOptions<CsvFileSettings> csvFileSettings,
                                       ICsvFileReaderService<VaccinationDataModel> vaccinationDataReaderService,
                                       IVaccinationDataRepository vaccinationDataRepository,
                                       IFileIntegrationRepository integrationRepository,
-                                      CsvFileHelper csvFileHelper)
+                                      CsvFileHelper csvFileHelper,
+                                      IConfiguration configuration)
         {
             _csvFileSettings = csvFileSettings.Value;
             _vaccinationDataReaderService = vaccinationDataReaderService;
             _vaccinationDataRepository = vaccinationDataRepository;
             _integrationRepository = integrationRepository;
             _csvFileHelper = csvFileHelper;
+            var mappingFilePath = configuration["JsonFiles:CountryNameMappingFile"];
+
+            if (string.IsNullOrEmpty(mappingFilePath))
+            {
+                throw new InvalidOperationException("CountryNameMappingFilePath is missing in configuration.");
+            }
+
+            _countryNameMapper = new CountryNameMapper(mappingFilePath);
         }
 
         public async Task IntegrateVaccinationDataAsync()
@@ -73,11 +84,14 @@ namespace CDI.CovidDataManagement.API.Services
 
             _csvFileHelper.ValidateCsvFilename(csvFilename);
 
-            var vaccinationDataCountry = await _vaccinationDataRepository.GetVaccinationDataByMaxIntegrationIdAndCountryAsync(csvFilename, country);
+            // Map the input country name using the mapper
+            string mappedCountryName = _countryNameMapper.MapCountryNameByValue(country);
+
+            var vaccinationDataCountry = await _vaccinationDataRepository.GetVaccinationDataByMaxIntegrationIdAndCountryAsync(csvFilename, mappedCountryName);
 
             return new VaccinationDataDto
             {
-                Region = vaccinationDataCountry.Region,
+                Region = country,
                 TotalVaccineDoses = vaccinationDataCountry.TotalVaccineDoses,
                 PersonsVaccinatedAtLeastOneDose = vaccinationDataCountry.PersonsVaccinatedAtLeastOneDose,
                 PersonsVaccinatedWithCompletePrimarySeries = vaccinationDataCountry.PersonsVaccinatedWithCompletePrimarySeries

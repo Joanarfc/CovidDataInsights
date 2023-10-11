@@ -1,4 +1,5 @@
-﻿using CDI.CovidDataManagement.API.Data.Repository;
+﻿using CDI.Core.DomainObjects;
+using CDI.CovidDataManagement.API.Data.Repository;
 using CDI.CovidDataManagement.API.DTO;
 using CDI.CovidDataManagement.API.Extensions;
 using CDI.CovidDataManagement.API.Factories;
@@ -20,18 +21,28 @@ namespace CDI.CovidDataManagement.API.Services
         private readonly IWhoGlobalTableDataRepository _whoGlobalTableDataRepository;
         private readonly IFileIntegrationRepository _integrationRepository;
         private readonly CsvFileHelper _csvFileHelper;
+        private readonly CountryNameMapper _countryNameMapper;
 
         public WhoGlobalTableDataService(IOptions<CsvFileSettings> csvFileSettings,
                                       ICsvFileReaderService<WhoGlobalTableDataModel> whoGlobalTableDataReaderService,
                                       IWhoGlobalTableDataRepository whoGlobalTableDataRepository,
                                       IFileIntegrationRepository integrationRepository,
-                                      CsvFileHelper csvFileHelper)
+                                      CsvFileHelper csvFileHelper,
+                                      IConfiguration configuration)
         {
             _csvFileSettings = csvFileSettings.Value;
             _whoGlobalTableDataReaderService = whoGlobalTableDataReaderService;
             _whoGlobalTableDataRepository = whoGlobalTableDataRepository;
             _integrationRepository = integrationRepository;
             _csvFileHelper = csvFileHelper;
+            var mappingFilePath = configuration["JsonFiles:CountryNameMappingFile"];
+
+            if (string.IsNullOrEmpty(mappingFilePath))
+            {
+                throw new InvalidOperationException("CountryNameMappingFilePath is missing in configuration.");
+            }
+
+            _countryNameMapper = new CountryNameMapper(mappingFilePath);
         }
 
         public async Task IntegrateWhoGlobalTableDataAsync()
@@ -74,11 +85,14 @@ namespace CDI.CovidDataManagement.API.Services
 
             _csvFileHelper.ValidateCsvFilename(csvFilename);
 
-            var casesAndDeathsDataCountry = await _whoGlobalTableDataRepository.GetCasesAndDeathsDataByMaxIntegrationIdAndCountryAsync(csvFilename, country);
+            // Map the input country name using the mapper
+            string mappedCountryName = _countryNameMapper.MapCountryNameByValue(country);
+
+            var casesAndDeathsDataCountry = await _whoGlobalTableDataRepository.GetCasesAndDeathsDataByMaxIntegrationIdAndCountryAsync(csvFilename, mappedCountryName);
 
             return new CasesAndDeathsDataDto
             {
-                Region = casesAndDeathsDataCountry.Region,
+                Region = country,
                 NewCasesLast7Days = casesAndDeathsDataCountry.NewCasesLast7Days,
                 CumulativeCases = casesAndDeathsDataCountry.CumulativeCases,
                 NewDeathsLast7Days = casesAndDeathsDataCountry.NewDeathsLast7Days,
