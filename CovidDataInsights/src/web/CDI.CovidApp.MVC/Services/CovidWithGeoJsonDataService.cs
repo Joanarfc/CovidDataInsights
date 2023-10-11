@@ -5,6 +5,7 @@ namespace CDI.CovidApp.MVC.Services
     public interface ICovidWithGeoJsonDataService
     {
         Task<List<CovidWithGeoJsonDataViewModel>> GetCovidWithGeoJsonDataAsync();
+        Task<CovidWithGeoJsonDataViewModel> GetCovidWithGeoJsonByCountryDataAsync(string? country = null);
     }
     public class CovidWithGeoJsonDataService : ICovidWithGeoJsonDataService
     {
@@ -53,7 +54,7 @@ namespace CDI.CovidApp.MVC.Services
                     }
                     else
                     {
-                        // No matching COVID-19 data for this country
+                        // If no matching GeoJSON data is found, return empty result
                         return null;
                     }
                 })
@@ -61,6 +62,44 @@ namespace CDI.CovidApp.MVC.Services
                 .ToList();
 
             return covidWithGeoJsonData;
+        }
+        public async Task<CovidWithGeoJsonDataViewModel> GetCovidWithGeoJsonByCountryDataAsync(string? country = null)
+        {
+            var geoJsonDataResponse = await _geoJsonDataService.GetGeoJsonData();
+            var covidDataResponse = await _covidDataService.GetTotalCovidDataByCountryAsync(country);
+
+            if (covidDataResponse == null || geoJsonDataResponse == null)
+            {
+                return new CovidWithGeoJsonDataViewModel();
+            }
+
+            // NameEN property is the key used for matching GeoJSON data
+            var nameEN = covidDataResponse.Region;
+
+            if(nameEN == "Global")
+            {
+                return new CovidWithGeoJsonDataViewModel
+                {
+                    CovidData = covidDataResponse
+                };
+            }
+            else
+            {
+                // Find the matching GeoJSON data based on the region name (NameEN)
+                var matchingGeoJson = geoJsonDataResponse.FirstOrDefault(geoJson => geoJson.NameEN == nameEN);
+
+                if (matchingGeoJson != null)
+                {
+                    return new CovidWithGeoJsonDataViewModel
+                    {
+                        CovidData = covidDataResponse,
+                        GeoJsonData = matchingGeoJson
+                    };
+                }
+
+                // If no matching GeoJSON data is found, return empty result
+                return new CovidWithGeoJsonDataViewModel();
+            }
         }
     }
 }

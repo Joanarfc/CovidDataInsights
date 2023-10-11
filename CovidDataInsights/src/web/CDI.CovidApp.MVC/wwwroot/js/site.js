@@ -81,8 +81,8 @@ function createMouseoverPolygonStyle(item) {
 }
 
 // Function to format numbers
-function formatNumber(number) {
-    return number.toLocaleString('en-US');
+function formatNumber(value) {
+    return value !== null ? value.toLocaleString('en-US') : 'N/A';
 }
 
 $.getJSON(dataUrl, function (data) {
@@ -202,28 +202,28 @@ function updateFilterData() {
         var filteredDataDiv = document.getElementById('filteredData');
         var selectedRegionDiv = document.getElementById('selectedRegion');
 
-        if (data) {
+        if (data && data.covidData) {
             selectedRegionDiv.textContent = "Region: " + (selectedCountry || "Global");
 
             var metricData = metricInfo[selectedMetric];
-            var numberHTML = `<div class="metric-number">${formatNumber(data[metricData.property])}</div>`;
+            var numberHTML = `<div class="metric-number">${formatNumber(data.covidData[metricData.property])}</div>`;
             var labelHTML = `<div class="metric-label">${metricData.label}</div></br>`;
             var filteredData = numberHTML + labelHTML;
 
             if (selectedMetric === "Cases") {
-                var newCasesHTML = `<div class="metric-number">${formatNumber(data.newCasesLast7Days)}</div>`;
+                var newCasesHTML = `<div class="metric-number">${formatNumber(data.covidData.newCasesLast7Days)}</div>`;
                 var newCasesLabelHTML = "<div class='metric-label'> New cases in the last 7 days</div>";
                 filteredData += newCasesHTML + newCasesLabelHTML;
             } else if (selectedMetric === "Vaccination") {
-                var vaccinatedAtLeastOneDoseHTML = `<div class="metric-number">${formatNumber(data.totalPersonsVaccinatedAtLeastOneDose)}</div>`;
+                var vaccinatedAtLeastOneDoseHTML = `<div class="metric-number">${formatNumber(data.covidData.totalPersonsVaccinatedAtLeastOneDose)}</div>`;
                 var vaccinatedAtLeastOneDoseLabelHTML = "<div class='metric-label'> Total Vaccinated With At Least 1 Dose</div></br>";
-                var completePrimarySeriesHTML = `<div class="metric-number">${formatNumber(data.totalPersonsVaccinatedWithCompletePrimarySeries)}</div>`;
+                var completePrimarySeriesHTML = `<div class="metric-number">${formatNumber(data.covidData.totalPersonsVaccinatedWithCompletePrimarySeries)}</div>`;
                 var completePrimarySeriesLabelHTML = "<div class='metric-label'> Total Vaccinated With Complete Primary Series</div>";
 
                 filteredData += vaccinatedAtLeastOneDoseHTML + vaccinatedAtLeastOneDoseLabelHTML;
                 filteredData += completePrimarySeriesHTML + completePrimarySeriesLabelHTML;
             } else if (selectedMetric === "Deaths") {
-                var newDeathsHTML = `<div class="metric-number">${formatNumber(data.newDeathsLast7Days)}</div>`;
+                var newDeathsHTML = `<div class="metric-number">${formatNumber(data.covidData.newDeathsLast7Days)}</div>`;
                 var newDeathsLabelHTML = "<div class='metric-label'> New deaths in the last 7 days</div>";
                 filteredData += newDeathsHTML + newDeathsLabelHTML;
             }
