@@ -89,6 +89,12 @@ namespace CDI.CovidDataManagement.API.Services
 
             var vaccinationDataCountry = await _vaccinationDataRepository.GetVaccinationDataByMaxIntegrationIdAndCountryAsync(csvFilename, mappedCountryName);
 
+            if (vaccinationDataCountry == null)
+            {
+                mappedCountryName = _countryNameMapper.MapCountryNameByKey(country);
+                vaccinationDataCountry = await _vaccinationDataRepository.GetVaccinationDataByMaxIntegrationIdAndCountryAsync(csvFilename, mappedCountryName);
+            }
+
             return new VaccinationDataDto
             {
                 Region = country,
