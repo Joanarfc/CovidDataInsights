@@ -1,4 +1,5 @@
-﻿using CDI.CovidDataManagement.API.DTO;
+﻿using CDI.Core.DomainObjects;
+using CDI.CovidDataManagement.API.DTO;
 
 namespace CDI.CovidDataManagement.API.Services
 {
@@ -14,16 +15,26 @@ namespace CDI.CovidDataManagement.API.Services
         private readonly IVaccinationMetaDataService _vaccinationMetaDataService;
         private readonly IWhoGlobalDataService _whoGlobalDataService;
         private readonly IWhoGlobalTableDataService _whoGlobalTableDataService;
+        private readonly CountryNameMapper _countryNameMapper;
 
         public CovidDataAggregatorService(IWhoGlobalTableDataService whoGlobalTableDataService,
                                           IVaccinationDataService vaccinationDataService,
                                           IVaccinationMetaDataService vaccinationMetaDataService,
-                                          IWhoGlobalDataService whoGlobalDataService)
+                                          IWhoGlobalDataService whoGlobalDataService,
+                                          IConfiguration configuration)
         {
             _whoGlobalTableDataService = whoGlobalTableDataService;
             _vaccinationDataService = vaccinationDataService;
             _vaccinationMetaDataService = vaccinationMetaDataService;
             _whoGlobalDataService = whoGlobalDataService;
+            var mappingFilePath = configuration["JsonFiles:CountryNameMappingFile"];
+
+            if (string.IsNullOrEmpty(mappingFilePath))
+            {
+                throw new InvalidOperationException("CountryNameMappingFilePath is missing in configuration.");
+            }
+
+            _countryNameMapper = new CountryNameMapper(mappingFilePath);
         }
         public async Task IntegrateCovidCsvDataAsync()
         {
@@ -65,7 +76,7 @@ namespace CDI.CovidDataManagement.API.Services
             return covidData;
         }
 
-        private static IEnumerable<CovidDataDto> MergeCovidData(IEnumerable<VaccinationDataDto> vaccinationData,
+        private IEnumerable<CovidDataDto> MergeCovidData(IEnumerable<VaccinationDataDto> vaccinationData,
                                                          IEnumerable<CasesAndDeathsDataDto> casesAndDeathsData,
                                                          string? country = null)
         {
@@ -73,7 +84,7 @@ namespace CDI.CovidDataManagement.API.Services
             {
                 // Merge the data using "Region"
                 return from vcData in vaccinationData
-                       join cdData in casesAndDeathsData on vcData.Region equals cdData.Region
+                       join cdData in casesAndDeathsData on _countryNameMapper.MapCountryNameByValue(vcData.Region) equals _countryNameMapper.MapCountryNameByValue(cdData.Region)
                        select new CovidDataDto
                        {
                            Region = vcData.Region,

@@ -1,4 +1,5 @@
-﻿using CDI.CovidApp.MVC.Models;
+﻿using CDI.Core.DomainObjects;
+using CDI.CovidApp.MVC.Models;
 
 namespace CDI.CovidApp.MVC.Services
 {
@@ -11,11 +12,22 @@ namespace CDI.CovidApp.MVC.Services
     {
         private readonly ICovidDataService _covidDataService;
         private readonly IGeoJsonDataService _geoJsonDataService;
+        private readonly CountryNameMapper _countryNameMapper;
 
-        public CovidWithGeoJsonDataService(ICovidDataService covidDataService, IGeoJsonDataService geoJsonDataService)
+        public CovidWithGeoJsonDataService(ICovidDataService covidDataService,
+                                           IGeoJsonDataService geoJsonDataService,
+                                           IConfiguration configuration)
         {
             _covidDataService = covidDataService;
             _geoJsonDataService = geoJsonDataService;
+            var mappingFilePath = configuration["AppSettings:CountryNameMappingFile"];
+
+            if (string.IsNullOrEmpty(mappingFilePath))
+            {
+                throw new InvalidOperationException("CountryNameMappingFilePath is missing in configuration.");
+            }
+
+            _countryNameMapper = new CountryNameMapper(mappingFilePath);
         }
 
         public async Task<List<CovidWithGeoJsonDataViewModel>> GetCovidWithGeoJsonDataAsync()
@@ -29,7 +41,7 @@ namespace CDI.CovidApp.MVC.Services
             }
 
             // Lookup dictionary based on the key (Region) for COVID-19 data
-            var covidDataLookup = covidDataResponse.ToLookup(data => data.Region);
+            var covidDataLookup = covidDataResponse.ToLookup(data => MapCountryName(data.Region));
 
             // Combine the data by matching the GeoJSON data with COVID-19 data
             var covidWithGeoJsonData = geoJsonDataResponse
@@ -73,10 +85,10 @@ namespace CDI.CovidApp.MVC.Services
                 return new CovidWithGeoJsonDataViewModel();
             }
 
-            // NameEN property is the key used for matching GeoJSON data
-            var nameEN = covidDataResponse.Region;
+            // Map the provided country name to a common name
+            var mappedCountryName = MapCountryName(covidDataResponse.Region);
 
-            if(nameEN == "Global")
+            if (mappedCountryName == "Global")
             {
                 return new CovidWithGeoJsonDataViewModel
                 {
@@ -86,7 +98,7 @@ namespace CDI.CovidApp.MVC.Services
             else
             {
                 // Find the matching GeoJSON data based on the region name (NameEN)
-                var matchingGeoJson = geoJsonDataResponse.FirstOrDefault(geoJson => geoJson.NameEN == nameEN);
+                var matchingGeoJson = geoJsonDataResponse.FirstOrDefault(geoJson => geoJson.NameEN == mappedCountryName);
 
                 if (matchingGeoJson != null)
                 {
@@ -100,6 +112,12 @@ namespace CDI.CovidApp.MVC.Services
                 // If no matching GeoJSON data is found, return empty result
                 return new CovidWithGeoJsonDataViewModel();
             }
+        }
+
+        // Map country names to a common format
+        private string MapCountryName(string inputName)
+        {
+            return _countryNameMapper.MapCountryNameByKey(inputName);
         }
     }
 }

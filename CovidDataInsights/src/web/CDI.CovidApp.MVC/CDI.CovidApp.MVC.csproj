@@ -180,4 +180,8 @@
     <None Include="wwwroot\app\extcontent\scss\.sass-cache\d192277f41c6848ff7411af310ee7b2a42ab6d76\_visibility.scssc" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\..\building blocks\CDI.Core\CDI.Core.csproj" />
+  </ItemGroup>
+
 </Project>
