@@ -13,8 +13,39 @@ Covid Data Insights is a web-based mapping application that uses the <ins>Leafle
 
 <img src="https://github.com/Joanarfc/CovidDataInsights/assets/36134456/aa92c1e0-b406-48e4-ab19-9b4420ae4843" alt="architecture image" title="architecture image">
 
-## Framework
-* .NET 6
+## How to Run
+
+Prerequisites: .NET 6 SDK, SQL Server, PostgreSQL with PostGIS extension.
+
+1. Clone and restore:
+```bash
+   git clone https://github.com/Joanarfc/CovidDataInsights.git
+   cd CovidDataInsights
+   dotnet restore
+```
+2. Configure connection strings in `appsettings.Development.json` for
+   both the `CovidDataManagement` API (SQL Server) and the
+   `GeoSpatialDataLoader` API (PostgreSQL/PostGIS).
+3. Run database migrations for each API:
+```bash
+   dotnet ef database update --project src/services/CDI.CovidDataManagement.API
+   dotnet ef database update --project src/services/CDI.GeoSpatialDataLoader.API
+```
+4. Start both APIs (in separate terminals, since both need to stay running):
+```bash
+   dotnet run --project src/services/CDI.CovidDataManagement.API/CDI.CovidDataManagement.API.csproj
+   dotnet run --project src/services/CDI.GeoSpatialDataLoader.API/CDI.GeoSpatialDataLoader.API.csproj
+```
+5. Start the frontend (also its own terminal):
+```bash
+   dotnet run --project src/web/CDI.CovidApp.MVC/CDI.CovidApp.MVC.csproj
+```
+6. Open the URL shown in the MVC project's console output to view the map.
+
+## Data Refresh
+
+WHO case/vaccination data is loaded once from a static CSV snapshot. GeoJSON boundary data from Natural Earth is static and only needs to be loaded once, since country/region boundaries rarely change.
+
 
 ## Technologies Used
 
