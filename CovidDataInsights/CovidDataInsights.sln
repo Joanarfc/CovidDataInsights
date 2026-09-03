@@ -1,4 +1,4 @@
-﻿
+
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33801.468
@@ -23,7 +23,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Services", "Services", "{77
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CDI.WebAPI.Core", "src\building blocks\CDI.WebAPI.Core\CDI.WebAPI.Core.csproj", "{242D3647-B6DA-462D-A7D8-7AACAB456537}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CDI.CovidApp.MVC", "src\web\CDI.CovidApp.MVC\CDI.CovidApp.MVC.csproj", "{56EECE8C-B731-4DD5-819D-4407BE1136C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CDI.CovidApp.MVC", "src\web\CDI.CovidApp.MVC\CDI.CovidApp.MVC.csproj", "{56EECE8C-B731-4DD5-819D-4407BE1136C1}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

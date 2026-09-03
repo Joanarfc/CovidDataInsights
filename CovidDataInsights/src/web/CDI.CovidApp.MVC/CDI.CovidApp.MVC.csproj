@@ -1,11 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
-
   <PropertyGroup>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
-
   <ItemGroup>
     <None Include="wwwroot\app\extcontent\scss\.sass-cache\0c2f4e7e3ce607a0f7f238a71122520ed74aaa15\style.scssc" />
     <None Include="wwwroot\app\extcontent\scss\.sass-cache\0c2f4e7e3ce607a0f7f238a71122520ed74aaa15\variables.scssc" />
@@ -179,9 +177,7 @@
     <None Include="wwwroot\app\extcontent\scss\.sass-cache\d192277f41c6848ff7411af310ee7b2a42ab6d76\_text.scssc" />
     <None Include="wwwroot\app\extcontent\scss\.sass-cache\d192277f41c6848ff7411af310ee7b2a42ab6d76\_visibility.scssc" />
   </ItemGroup>
-
   <ItemGroup>
     <ProjectReference Include="..\..\building blocks\CDI.Core\CDI.Core.csproj" />
   </ItemGroup>
-
 </Project>
