@@ -1,0 +1,5 @@
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Port=5433;Database=GeoSpatialDB;Username=YOUR_USER;Password=YOUR_PASSWORD"
+  }
+}
